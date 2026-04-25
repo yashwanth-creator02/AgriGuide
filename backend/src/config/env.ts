@@ -13,4 +13,5 @@ export const env = {
     DB_PASSWORD: process.env.DB_PASSWORD || '',
     DB_NAME: process.env.DB_NAME || 'agriguide',
     MARKET_API_KEY: process.env.MARKET_API_KEY || '',
+    JWT_SECRET: process.env.JWT_SECRET || 'fallback_secret',
 }

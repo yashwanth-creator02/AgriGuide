@@ -29,6 +29,7 @@ export const getSoilDataByFarmer = async (req: Request, res: Response) => {
 
 // Create soil data
 export const createSoilData = async (req: Request, res: Response) => {
+    console.log('Soil data received:', req.body)
     try {
         const { farmer_id, soil_type, ph, nitrogen, phosphorus, potassium, location, season } = req.body
         const result = await pool.query(

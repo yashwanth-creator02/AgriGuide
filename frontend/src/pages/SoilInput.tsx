@@ -71,16 +71,23 @@ function SoilInput() {
       season: formData.season,
     };
 
-    // Step 1: Save soil data first
-    const savedSoil = await saveSoilData(soilData);
+    console.log('Submitting soil data:', soilData); // add this
 
-    // Step 2: Get recommendations using soil_id
-    const results = await getRecommendations({
-      ...soilData,
-      soil_id: savedSoil.id,
-    });
+    try {
+      // Step 1: Save soil data first
+      const savedSoil = await saveSoilData(soilData);
+      console.log('Saved soil:', savedSoil); // add this
 
-    navigate('/results', { state: { results, location: formData.location } });
+      // Step 2: Get recommendations using soil_id
+      const results = await getRecommendations({
+        ...soilData,
+        soil_id: savedSoil.id,
+      });
+
+      navigate('/results', { state: { results, location: formData.location } });
+    } catch (err) {
+      console.error('Submit error:', err); // add this
+    }
   };
 
   const selectTriggerClass =
