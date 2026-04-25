@@ -1,0 +1,7 @@
+// frontend/src/pages/Results.tsx
+
+function Results() {
+  return <div>Results</div>;
+}
+
+export default Results;
