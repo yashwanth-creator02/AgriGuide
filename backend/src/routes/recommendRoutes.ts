@@ -5,10 +5,11 @@ import {
     getRecommendations,
     getRecommendationsByFarmer,
 } from '../controllers/recommendController'
+import { validateSoilInput } from '../middleware/validateRequest'
 
 const router = Router()
 
-router.post('/', getRecommendations)
+router.post('/', validateSoilInput, getRecommendations)
 router.get('/farmer/:farmer_id', getRecommendationsByFarmer)
 
 export default router

@@ -7,6 +7,8 @@ import soilRoutes from './routes/soilRoutes'
 import weatherRoutes from './routes/weatherRoutes'
 import recommendRoutes from './routes/recommendRoutes'
 import cropRoutes from './routes/cropRoutes'
+import { errorHandler } from './middleware/errorHandler'
+
 
 const app = express()
 
@@ -25,5 +27,7 @@ app.use('/api/crops', cropRoutes)
 app.get('/', (req, res) => {
     res.json({ message: 'AgriGuide API is running!' })
 })
+
+app.use(errorHandler)
 
 export default app
