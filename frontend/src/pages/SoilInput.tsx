@@ -5,7 +5,6 @@ import { useNavigate } from 'react-router-dom';
 import {
   ChevronLeft,
   Microscope,
-  Waves,
   ThermometerSun,
   Leaf,
   Info,
@@ -13,6 +12,7 @@ import {
   MapPin,
 } from 'lucide-react';
 import { useCropRecommend } from '@/hooks/useCropRecommend';
+import MapPicker from '@/components/MapPicker';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -31,6 +31,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 function SoilInput() {
   const navigate = useNavigate();
   const { getRecommendations, loading } = useCropRecommend();
+  const [showMap, setShowMap] = useState(false);
 
   const [formData, setFormData] = useState({
     farmer_id: 1,
@@ -52,6 +53,10 @@ function SoilInput() {
     setFormData({ ...formData, [name]: value });
   };
 
+  const handleLocationSelect = (location: string) => {
+    setFormData({ ...formData, location });
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const soilData = {
@@ -67,7 +72,6 @@ function SoilInput() {
     navigate('/results', { state: { results, location: formData.location } });
   };
 
-  // Modern Dropdown Trigger Style
   const selectTriggerClass =
     'h-12 bg-white/50 backdrop-blur-sm border-slate-200 focus:ring-green-500 hover:bg-white/80 transition-all rounded-xl';
 
@@ -127,18 +131,43 @@ function SoilInput() {
                           <SelectItem value="clay">Clay</SelectItem>
                           <SelectItem value="sandy loam">Sandy Loam</SelectItem>
                           <SelectItem value="loamy">Loamy</SelectItem>
+                          <SelectItem value="clay loam">Clay Loam</SelectItem>
                           <SelectItem value="black soil">Black Soil</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
+
+                    {/* Location with Map Picker */}
                     <div className="space-y-2">
                       <Label className="text-slate-700 font-medium ml-1">Farm Location</Label>
-                      <Input
-                        name="location"
-                        className="h-12 bg-white/50 border-slate-200 focus:ring-green-500 rounded-xl"
-                        placeholder="e.g. Pune, Maharashtra"
-                        onChange={handleChange}
-                      />
+                      <div className="flex gap-2">
+                        <Input
+                          name="location"
+                          value={formData.location}
+                          className="h-12 bg-white/50 border-slate-200 focus:ring-green-500 rounded-xl"
+                          placeholder="e.g. Pune, Maharashtra"
+                          onChange={handleChange}
+                        />
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button
+                                type="button"
+                                onClick={() => setShowMap(true)}
+                                className="h-12 px-4 bg-green-600 hover:bg-green-700 rounded-xl shadow-md shadow-green-200 transition-all hover:scale-105 active:scale-95 shrink-0"
+                              >
+                                <MapPin className="h-4 w-4" />
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>Pick location from map</TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      </div>
+                      {formData.location && (
+                        <p className="text-xs text-green-600 ml-1 flex items-center gap-1">
+                          <MapPin className="h-3 w-3" /> {formData.location}
+                        </p>
+                      )}
                     </div>
                   </div>
                 </section>
@@ -164,9 +193,19 @@ function SoilInput() {
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                     {[
                       { label: 'pH Level', name: 'ph', step: '0.1', placeholder: '6.5' },
-                      { label: 'Nitrogen (N)', name: 'nitrogen', step: '1', placeholder: 'N' },
-                      { label: 'Phosphorus (P)', name: 'phosphorus', step: '1', placeholder: 'P' },
-                      { label: 'Potassium (K)', name: 'potassium', step: '1', placeholder: 'K' },
+                      { label: 'Nitrogen (N)', name: 'nitrogen', step: '1', placeholder: 'kg/ha' },
+                      {
+                        label: 'Phosphorus (P)',
+                        name: 'phosphorus',
+                        step: '1',
+                        placeholder: 'kg/ha',
+                      },
+                      {
+                        label: 'Potassium (K)',
+                        name: 'potassium',
+                        step: '1',
+                        placeholder: 'kg/ha',
+                      },
                     ].map((field) => (
                       <div key={field.name} className="space-y-2">
                         <Label className="text-[10px] font-bold text-slate-500 uppercase ml-1">
@@ -242,11 +281,20 @@ function SoilInput() {
                   <div className="h-1.5 w-1.5 rounded-full bg-green-500 mt-2 shrink-0" />
                   Season helps our AI adjust for temperature variations.
                 </li>
+                <li className="flex gap-3 leading-relaxed">
+                  <div className="h-1.5 w-1.5 rounded-full bg-green-500 mt-2 shrink-0" />
+                  Use the map pin to auto-detect your farm location.
+                </li>
               </ul>
             </div>
           </div>
         </div>
       </div>
+
+      {/* Map Picker Modal */}
+      {showMap && (
+        <MapPicker onLocationSelect={handleLocationSelect} onClose={() => setShowMap(false)} />
+      )}
     </div>
   );
 }

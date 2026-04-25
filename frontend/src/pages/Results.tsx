@@ -1,10 +1,19 @@
+// frontend/src/pages/Results.tsx
+
 import { useLocation, useNavigate } from 'react-router-dom';
+import ResultCard from '@/components/ResultCard';
+import WeatherWidget from '@/components/WeatherWidget';
+import { useWeather } from '@/hooks/useWeather';
+import type { Recommendation } from '../types';
 
 function Results() {
   const location = useLocation();
   const navigate = useNavigate();
-  const results = location.state?.results || [];
+
+  const results: Recommendation[] = location.state?.results ?? [];
   const userLocation = location.state?.location || '';
+
+  const { weather, loading: weatherLoading } = useWeather(userLocation);
 
   if (results.length === 0) {
     return (
@@ -28,23 +37,13 @@ function Results() {
           Based on your soil data {userLocation && `for ${userLocation}`}
         </p>
 
-        <div className="space-y-4">
-          {results.map((crop: any, index: number) => (
-            <div
-              key={index}
-              className="bg-white rounded-xl shadow p-6 flex items-center justify-between"
-            >
-              <div>
-                <h2 className="text-lg font-semibold text-gray-800">{crop.crop_name}</h2>
-                <p className="text-sm text-gray-500 mt-1">{crop.reason}</p>
-              </div>
-              <div className="text-right">
-                <span className="text-2xl font-bold text-green-600">{crop.suitability_score}%</span>
-                <p className="text-xs text-gray-400">Suitability</p>
-              </div>
-            </div>
+        <div className="space-y-4 mb-8">
+          {results.map((recommendation, index) => (
+            <ResultCard key={index} recommendation={recommendation} />
           ))}
         </div>
+
+        {!weatherLoading && weather && <WeatherWidget weather={weather} />}
 
         <button
           onClick={() => navigate('/soil-input')}

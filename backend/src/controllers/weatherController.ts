@@ -4,26 +4,36 @@ import { Request, Response } from 'express'
 
 // Get coordinates from location name using Open-Meteo Geocoding API
 const getCoordinates = async (location: string) => {
-    const response = await fetch(
-        `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(location)}&count=1`
-    )
-    const data = await response.json() as any
-    if (!data.results || data.results.length === 0) {
-        throw new Error('Location not found')
+    const parts = location.split(',').map((p) => p.trim())
+
+    // Try each part of the location until one works
+    for (const part of parts) {
+        try {
+            const response = await fetch(
+                `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(part)}&count=1`
+            )
+            const data = await response.json() as any
+            if (data.results && data.results.length > 0) {
+                return {
+                    lat: data.results[0].latitude,
+                    lng: data.results[0].longitude,
+                    name: data.results[0].name,
+                    country: data.results[0].country,
+                }
+            }
+        } catch {
+            continue
+        }
     }
-    return {
-        lat: data.results[0].latitude,
-        lng: data.results[0].longitude,
-        name: data.results[0].name,
-        country: data.results[0].country,
-    }
+
+    throw new Error('Location not found')
 }
 
 // Get weather data from Open-Meteo
 export const getWeather = async (req: Request, res: Response) => {
     try {
         const { location } = req.query
-
+        console.log('Weather location received:', location)
         if (!location) {
             return res.status(400).json({ message: 'Location is required' })
         }
@@ -47,6 +57,7 @@ export const getWeather = async (req: Request, res: Response) => {
             wind_speed: current.wind_speed_10m,
         })
     } catch (error: any) {
+        console.error('Weather error:', error)
         res.status(500).json({ message: error.message || 'Error fetching weather data' })
     }
 }

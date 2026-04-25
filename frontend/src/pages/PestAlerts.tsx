@@ -1,53 +1,49 @@
 // frontend/src/pages/PestAlerts.tsx
 
+import AlertBanner from '../components/AlertBanner';
+
 const alertsData = [
   {
     id: 1,
-    pest: 'Fall Armyworm',
-    crop: 'Maize',
+    pest_name: 'Fall Armyworm',
+    affected_crop: 'Maize',
     region: 'Karnataka, Andhra Pradesh',
     severity: 'High',
     description: 'Widespread infestation reported. Apply recommended pesticides immediately.',
   },
   {
     id: 2,
-    pest: 'Brown Plant Hopper',
-    crop: 'Rice',
+    pest_name: 'Brown Plant Hopper',
+    affected_crop: 'Rice',
     region: 'Tamil Nadu, Kerala',
     severity: 'Medium',
     description: 'Moderate spread detected. Monitor fields closely and drain excess water.',
   },
   {
     id: 3,
-    pest: 'Aphids',
-    crop: 'Wheat',
+    pest_name: 'Aphids',
+    affected_crop: 'Wheat',
     region: 'Punjab, Haryana',
     severity: 'Low',
     description: 'Minor presence observed. Use neem-based sprays as a precaution.',
   },
   {
     id: 4,
-    pest: 'Whitefly',
-    crop: 'Cotton',
+    pest_name: 'Whitefly',
+    affected_crop: 'Cotton',
     region: 'Gujarat, Rajasthan',
     severity: 'High',
     description: 'Severe outbreak reported. Consult local agricultural officer immediately.',
   },
   {
     id: 5,
-    pest: 'Stem Borer',
-    crop: 'Sugarcane',
+    pest_name: 'Stem Borer',
+    affected_crop: 'Sugarcane',
     region: 'Uttar Pradesh, Bihar',
     severity: 'Medium',
     description: 'Moderate infestation detected. Apply carbofuran granules near root zone.',
   },
-];
-
-const severityColor: Record<string, string> = {
-  High: 'bg-red-100 text-red-600',
-  Medium: 'bg-yellow-100 text-yellow-600',
-  Low: 'bg-green-100 text-green-600',
-};
+] as const;
 
 function PestAlerts() {
   return (
@@ -58,23 +54,14 @@ function PestAlerts() {
 
         <div className="space-y-4">
           {alertsData.map((alert) => (
-            <div key={alert.id} className="bg-white rounded-xl shadow p-6">
-              <div className="flex items-center justify-between mb-2">
-                <h2 className="text-lg font-semibold text-gray-800">{alert.pest}</h2>
-                <span
-                  className={`text-xs font-semibold px-3 py-1 rounded-full ${severityColor[alert.severity]}`}
-                >
-                  {alert.severity}
-                </span>
-              </div>
-              <p className="text-sm text-gray-500 mb-1">
-                🌾 Affected Crop: <span className="font-medium text-gray-700">{alert.crop}</span>
-              </p>
-              <p className="text-sm text-gray-500 mb-3">
-                📍 Region: <span className="font-medium text-gray-700">{alert.region}</span>
-              </p>
-              <p className="text-sm text-gray-600">{alert.description}</p>
-            </div>
+            <AlertBanner
+              key={alert.id}
+              pest_name={alert.pest_name}
+              affected_crop={alert.affected_crop}
+              region={alert.region}
+              severity={alert.severity}
+              description={alert.description}
+            />
           ))}
         </div>
       </div>
