@@ -3,7 +3,6 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Layout from './components/Layout';
 import Home from './pages/Home';
-import Advisory from './pages/Advisory';
 import SoilInput from './pages/SoilInput';
 import CropInfo from './pages/CropInfo';
 import Results from './pages/Results';
@@ -17,7 +16,6 @@ function App() {
       <Routes>
         <Route path="/" element={<Layout />}>
           <Route index element={<Home />} />
-          <Route path="advisory" element={<Advisory />} />
           <Route path="soil-input" element={<SoilInput />} />
           <Route path="crop-info" element={<CropInfo />} />
           <Route path="results" element={<Results />} />

@@ -12,4 +12,5 @@ export const env = {
     DB_USER: process.env.DB_USER || 'postgres',
     DB_PASSWORD: process.env.DB_PASSWORD || '',
     DB_NAME: process.env.DB_NAME || 'agriguide',
+    MARKET_API_KEY: process.env.MARKET_API_KEY || '',
 }

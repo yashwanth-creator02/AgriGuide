@@ -8,6 +8,7 @@ import weatherRoutes from './routes/weatherRoutes'
 import recommendRoutes from './routes/recommendRoutes'
 import cropRoutes from './routes/cropRoutes'
 import { errorHandler } from './middleware/errorHandler'
+import marketRoutes from './routes/marketRoutes'
 
 
 const app = express()
@@ -22,6 +23,7 @@ app.use('/api/soil', soilRoutes)
 app.use('/api/weather', weatherRoutes)
 app.use('/api/recommendations', recommendRoutes)
 app.use('/api/crops', cropRoutes)
+app.use('/api/market', marketRoutes)
 
 // Health check
 app.get('/', (req, res) => {

@@ -1,5 +1,7 @@
 // backend/src/services/externalApiService.ts
 
+import { env } from "process"
+
 // External API integrations
 // Weather: Open-Meteo (already in weatherController)
 // Market Prices: data.gov.in (to be integrated later)
@@ -29,5 +31,47 @@ export const getCoordinatesFromName = async (location: string) => {
     }
 }
 
-// TODO: Integrate data.gov.in for market prices
+// Market Prices: data.gov.in Agmarknet API
+
+export const getMarketPrices = async (commodity?: string) => {
+    try {
+        // Updated Resource ID for active daily prices
+        const resourceId = "9ef84268-d588-465a-a308-a864a43d0070";
+        const apiKey = process.env.MARKET_API_KEY;
+
+        let url = `https://api.data.gov.in/resource/${resourceId}?api-key=${apiKey}&format=json&limit=20`;
+
+        if (commodity) {
+            // Adding sorting so the user sees the newest prices first
+            url += `&filters[commodity]=${encodeURIComponent(commodity)}&sort[arrival_date]=desc`;
+        }
+
+        const response = await fetch(url);
+
+        if (!response.ok) {
+            throw new Error(`API responded with status: ${response.status}`);
+        }
+
+        const data = await response.json() as any;
+        console.log('Market API response:', JSON.stringify(data, null, 2))
+        if (!data.records || data.records.length === 0) {
+            return [];
+        }
+
+        return data.records.map((record: any) => ({
+            crop: record.commodity,
+            market: record.market,
+            district: record.district,
+            state: record.state,
+            min_price: record.min_price,
+            max_price: record.max_price,
+            price: record.modal_price,
+            unit: 'Quintal',
+            updated: record.arrival_date,
+        }))
+    } catch (error) {
+        console.error('Market prices error:', error);
+        return [];
+    }
+}
 // TODO: Integrate NIPHM for pest alerts

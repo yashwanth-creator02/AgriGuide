@@ -16,7 +16,6 @@ import { cn } from '@/lib/utils';
 
 const links = [
   { label: 'Home', path: '/' },
-  { label: 'Advisory', path: '/advisory' },
   { label: 'Crop Info', path: '/crop-info' },
   { label: 'Market Prices', path: '/market-prices' },
   { label: 'Pest Alerts', path: '/pest-alerts' },

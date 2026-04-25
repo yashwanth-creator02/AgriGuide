@@ -27,6 +27,7 @@ import {
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { saveSoilData } from '@/services/marketService';
 
 function SoilInput() {
   const navigate = useNavigate();
@@ -60,15 +61,25 @@ function SoilInput() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const soilData = {
-      ...formData,
+      farmer_id: formData.farmer_id,
+      soil_type: formData.soilType,
       ph: Number(formData.ph),
       nitrogen: Number(formData.nitrogen),
       phosphorus: Number(formData.phosphorus),
       potassium: Number(formData.potassium),
-      soil_type: formData.soilType,
+      location: formData.location,
+      season: formData.season,
     };
 
-    const results = await getRecommendations(soilData);
+    // Step 1: Save soil data first
+    const savedSoil = await saveSoilData(soilData);
+
+    // Step 2: Get recommendations using soil_id
+    const results = await getRecommendations({
+      ...soilData,
+      soil_id: savedSoil.id,
+    });
+
     navigate('/results', { state: { results, location: formData.location } });
   };
 

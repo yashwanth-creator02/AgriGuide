@@ -1,44 +1,40 @@
 // frontend/src/pages/CropInfo.tsx
 
 import { useState, useEffect } from 'react';
-import CropCard from '../components/CropCard';
-import type { CropInfo as CropType } from '../types';
-import { fetchCrops } from '../services/cropService';
+import { fetchCrops } from '@/services/cropService';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 function CropInfo() {
-  const [crops, setCrops] = useState<CropType[]>([]);
-  const [selectedCrop, setSelectedCrop] = useState<string>('');
+  const [crops, setCrops] = useState<any[]>([]);
+  const [selectedCrop, setSelectedCrop] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     fetchCrops()
-      .then((data: CropType[]) => setCrops(data))
-      .catch((err) => setError(err.message || 'Failed to load crops'))
+      .then(setCrops)
+      .catch((err) => setError(err.message))
       .finally(() => setLoading(false));
   }, []);
 
-  const info = crops.find((c) => c.name === selectedCrop);
+  const crop = crops.find((c) => c.name === selectedCrop);
 
-  if (loading) {
+  if (loading)
     return (
-      <div className="min-h-screen flex items-center justify-center text-gray-400">
-        Loading crops...
-      </div>
+      <div className="min-h-screen flex items-center justify-center text-gray-400">Loading...</div>
     );
-  }
-
-  if (error) {
+  if (error)
     return (
       <div className="min-h-screen flex items-center justify-center text-red-500">{error}</div>
     );
-  }
 
   return (
     <div className="min-h-screen bg-gray-50 py-12 px-6">
-      <div className="max-w-3xl mx-auto">
-        <h1 className="text-2xl font-bold text-green-700 mb-2">Crop Information</h1>
-        <p className="text-gray-500 text-sm mb-6">Select a crop to learn more about it</p>
+      <div className="max-w-2xl mx-auto">
+        <h1 className="text-2xl font-bold text-green-700 mb-2">Crop Guide</h1>
+        <p className="text-gray-500 text-sm mb-6">
+          Select a crop to view information and farming advice
+        </p>
 
         {/* Crop Selector */}
         <select
@@ -47,52 +43,71 @@ function CropInfo() {
           className="w-full border rounded-lg px-3 py-2 text-sm mb-8 focus:outline-none focus:ring-2 focus:ring-green-500"
         >
           <option value="">Select a crop</option>
-          {crops.map((crop) => (
-            <option key={crop.name} value={crop.name}>
-              {crop.name}
+          {crops.map((c) => (
+            <option key={c.name} value={c.name}>
+              {c.name}
             </option>
           ))}
         </select>
 
-        {/* Crop Cards (overview list) */}
-        <div className="grid gap-4 mb-10">
-          {crops.map((crop) => (
-            <div
-              key={crop.name}
-              onClick={() => setSelectedCrop(crop.name)}
-              className="cursor-pointer hover:scale-[1.01] transition"
-            >
-              <CropCard crop={crop} />
-            </div>
-          ))}
-        </div>
+        {crop ? (
+          <Tabs defaultValue="info">
+            <TabsList className="w-full mb-6">
+              <TabsTrigger value="info" className="flex-1">
+                📖 Crop Info
+              </TabsTrigger>
+              <TabsTrigger value="advisory" className="flex-1">
+                🌱 Advisory
+              </TabsTrigger>
+            </TabsList>
 
-        {/* Detailed Info Section */}
-        {info ? (
-          <div className="space-y-4">
-            <div className="bg-white rounded-xl shadow p-6">
-              <h2 className="text-md font-semibold text-green-700 mb-2">📖 About</h2>
-              <p className="text-sm text-gray-600">{info.about}</p>
-            </div>
+            {/* Crop Info Tab */}
+            <TabsContent value="info" className="space-y-4">
+              <div className="bg-white rounded-xl shadow p-6">
+                <h2 className="text-md font-semibold text-green-700 mb-2">📖 About</h2>
+                <p className="text-sm text-gray-600">{crop.about}</p>
+              </div>
+              <div className="bg-white rounded-xl shadow p-6">
+                <h2 className="text-md font-semibold text-green-700 mb-2">🌍 Best Soil Type</h2>
+                <p className="text-sm text-gray-600">{crop.suitable_soil.join(', ')}</p>
+              </div>
+              <div className="bg-white rounded-xl shadow p-6">
+                <h2 className="text-md font-semibold text-green-700 mb-2">🌡️ pH Range</h2>
+                <p className="text-sm text-gray-600">
+                  {crop.min_ph} - {crop.max_ph}
+                </p>
+              </div>
+              <div className="bg-white rounded-xl shadow p-6">
+                <h2 className="text-md font-semibold text-green-700 mb-2">
+                  🌤️ Climate Requirements
+                </h2>
+                <p className="text-sm text-gray-600">{crop.climate}</p>
+              </div>
+              <div className="bg-white rounded-xl shadow p-6">
+                <h2 className="text-md font-semibold text-green-700 mb-2">🦠 Common Diseases</h2>
+                <p className="text-sm text-gray-600">{crop.diseases}</p>
+              </div>
+            </TabsContent>
 
-            <div className="bg-white rounded-xl shadow p-6">
-              <h2 className="text-md font-semibold text-green-700 mb-2">🌍 Best Soil Type</h2>
-              <p className="text-sm text-gray-600">{info.suitable_soil?.join(', ') ?? 'N/A'}</p>
-            </div>
-
-            <div className="bg-white rounded-xl shadow p-6">
-              <h2 className="text-md font-semibold text-green-700 mb-2">🌤️ Climate Requirements</h2>
-              <p className="text-sm text-gray-600">{info.climate}</p>
-            </div>
-
-            <div className="bg-white rounded-xl shadow p-6">
-              <h2 className="text-md font-semibold text-green-700 mb-2">🦠 Common Diseases</h2>
-              <p className="text-sm text-gray-600">{info.diseases}</p>
-            </div>
-          </div>
+            {/* Advisory Tab */}
+            <TabsContent value="advisory" className="space-y-4">
+              <div className="bg-white rounded-xl shadow p-6">
+                <h2 className="text-md font-semibold text-green-700 mb-2">💧 Watering Schedule</h2>
+                <p className="text-sm text-gray-600">{crop.watering}</p>
+              </div>
+              <div className="bg-white rounded-xl shadow p-6">
+                <h2 className="text-md font-semibold text-green-700 mb-2">🌱 Fertilizer Tips</h2>
+                <p className="text-sm text-gray-600">{crop.fertilizer}</p>
+              </div>
+              <div className="bg-white rounded-xl shadow p-6">
+                <h2 className="text-md font-semibold text-green-700 mb-2">🌾 Harvest Time</h2>
+                <p className="text-sm text-gray-600">{crop.harvest}</p>
+              </div>
+            </TabsContent>
+          </Tabs>
         ) : (
           <div className="text-center text-gray-400 text-sm mt-12">
-            Select a crop above or click a card to view details
+            Select a crop above to see its details
           </div>
         )}
       </div>
