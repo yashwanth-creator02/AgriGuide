@@ -110,7 +110,7 @@ export const getRecommendations = async (req: Request, res: Response) => {
             .filter((c) => c.suitability_score > 0)
             .sort((a, b) => b.suitability_score - a.suitability_score)
             .slice(0, 3)
-
+        console.log('Scored crops:', scored)
         // Save recommendations to database
         for (const rec of scored) {
             await pool.query(
@@ -122,7 +122,8 @@ export const getRecommendations = async (req: Request, res: Response) => {
 
         res.json(scored)
     } catch (error) {
-        res.status(500).json({ message: 'Error generating recommendations' })
+        console.error('Recommendation error:', error)
+        res.status(500).json({ message: 'Error generating recommendations', error: String(error) })
     }
 }
 

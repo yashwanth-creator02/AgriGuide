@@ -1,21 +1,29 @@
 // frontend/src/pages/MarketPrices.tsx
 
-const marketData = [
-  { id: 1, crop: 'Wheat', price: 2150, market: 'Pune, Maharashtra', updated: '25 Apr 2026' },
-  { id: 2, crop: 'Rice', price: 3200, market: 'Hyderabad, Telangana', updated: '25 Apr 2026' },
-  { id: 3, crop: 'Maize', price: 1800, market: 'Bangalore, Karnataka', updated: '24 Apr 2026' },
-  { id: 4, crop: 'Soybean', price: 4100, market: 'Indore, Madhya Pradesh', updated: '24 Apr 2026' },
-  { id: 5, crop: 'Cotton', price: 6500, market: 'Ahmedabad, Gujarat', updated: '23 Apr 2026' },
-  {
-    id: 6,
-    crop: 'Sugarcane',
-    price: 350,
-    market: 'Lucknow, Uttar Pradesh',
-    updated: '23 Apr 2026',
-  },
-];
+import { useState, useEffect } from 'react';
+import { fetchMarketPrices } from '../services/marketService';
 
 function MarketPrices() {
+  const [marketData, setMarketData] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetchMarketPrices()
+      .then(setMarketData)
+      .catch((err) => setError(err.message))
+      .finally(() => setLoading(false));
+  }, []);
+
+  if (loading)
+    return (
+      <div className="min-h-screen flex items-center justify-center text-gray-400">Loading...</div>
+    );
+  if (error)
+    return (
+      <div className="min-h-screen flex items-center justify-center text-red-500">{error}</div>
+    );
+
   return (
     <div className="min-h-screen bg-gray-50 py-12 px-6">
       <div className="max-w-4xl mx-auto">
@@ -34,7 +42,7 @@ function MarketPrices() {
             </thead>
             <tbody>
               {marketData.map((item, index) => (
-                <tr key={item.id} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                <tr key={index} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
                   <td className="px-6 py-4 font-medium text-gray-800">{item.crop}</td>
                   <td className="px-6 py-4 text-green-600 font-semibold">₹{item.price}</td>
                   <td className="px-6 py-4 text-gray-600">{item.market}</td>

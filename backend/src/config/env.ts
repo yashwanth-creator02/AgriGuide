@@ -1,8 +1,9 @@
 // backend/src/config/env.ts
 
 import dotenv from 'dotenv'
+import path from 'path'
 
-dotenv.config()
+dotenv.config({ path: path.resolve(__dirname, '../../.env') })
 
 export const env = {
     PORT: process.env.PORT || 5000,
