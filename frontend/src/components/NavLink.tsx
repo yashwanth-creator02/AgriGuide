@@ -16,11 +16,17 @@ function NavLink({ to, label }: NavLinkProps) {
     <Link
       to={to}
       className={cn(
-        'text-sm font-medium transition-colors hover:text-green-700',
-        isActive ? 'text-green-700 font-semibold' : 'text-muted-foreground'
+        'relative px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200',
+        'hover:bg-green-50 hover:text-green-700',
+        isActive ? 'bg-green-50 text-green-700 font-semibold' : 'text-gray-600'
       )}
     >
       {label}
+
+      {/* subtle active indicator */}
+      {isActive && (
+        <span className="absolute bottom-0 left-2 right-2 h-[2px] bg-green-600 rounded-full" />
+      )}
     </Link>
   );
 }
