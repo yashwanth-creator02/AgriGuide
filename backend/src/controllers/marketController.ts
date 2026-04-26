@@ -5,10 +5,13 @@ import { getMarketPrices } from '../services/externalApiService'
 
 export const getMarket = async (req: Request, res: Response) => {
     try {
-        const { commodity } = req.query
-        const prices = await getMarketPrices(commodity as string)
-
-        if (prices.length === 0) {
+        const { commodity, page = '1', limit = '20' } = req.query
+        const prices = await getMarketPrices(
+            commodity as string,
+            Number(page),
+            Number(limit)
+        )
+        if (prices.records.length === 0) {
             return res.status(404).json({ message: 'No market data found' })
         }
 

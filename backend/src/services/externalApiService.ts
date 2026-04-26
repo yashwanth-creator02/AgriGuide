@@ -33,45 +33,54 @@ export const getCoordinatesFromName = async (location: string) => {
 
 // Market Prices: data.gov.in Agmarknet API
 
-export const getMarketPrices = async (commodity?: string) => {
+export const getMarketPrices = async (commodity?: string, page: number = 1, limit: number = 20) => {
     try {
-        // Updated Resource ID for active daily prices
         const resourceId = "9ef84268-d588-465a-a308-a864a43d0070";
         const apiKey = process.env.MARKET_API_KEY;
+        const offset = (page - 1) * limit
 
-        let url = `https://api.data.gov.in/resource/${resourceId}?api-key=${apiKey}&format=json&limit=20`;
+        let url = `https://api.data.gov.in/resource/${resourceId}?api-key=${apiKey}&format=json&limit=${limit}&offset=${offset}`
 
         if (commodity) {
-            // Adding sorting so the user sees the newest prices first
-            url += `&filters[commodity]=${encodeURIComponent(commodity)}&sort[arrival_date]=desc`;
+            url += `&filters[commodity]=${encodeURIComponent(commodity)}`
         }
 
-        const response = await fetch(url);
+        // Add timeout of 15 seconds
+        const controller = new AbortController()
+        const timeout = setTimeout(() => controller.abort(), 15000)
 
-        if (!response.ok) {
-            throw new Error(`API responded with status: ${response.status}`);
-        }
+        const response = await fetch(url, { signal: controller.signal })
+        clearTimeout(timeout)
 
-        const data = await response.json() as any;
-        console.log('Market API response:', JSON.stringify(data, null, 2))
+        if (!response.ok) throw new Error(`API responded with status: ${response.status}`)
+
+        const data = await response.json() as any
+
         if (!data.records || data.records.length === 0) {
-            return [];
+            return { records: [], total: 0 }
         }
 
-        return data.records.map((record: any) => ({
-            crop: record.commodity,
-            market: record.market,
-            district: record.district,
-            state: record.state,
-            min_price: record.min_price,
-            max_price: record.max_price,
-            price: record.modal_price,
-            unit: 'Quintal',
-            updated: record.arrival_date,
-        }))
-    } catch (error) {
-        console.error('Market prices error:', error);
-        return [];
+        return {
+            records: data.records.map((record: any) => ({
+                crop: record.commodity,
+                market: record.market,
+                district: record.district,
+                state: record.state,
+                min_price: record.min_price,
+                max_price: record.max_price,
+                price: parseFloat(record.modal_price) || 0,
+                unit: 'Quintal',
+                updated: record.arrival_date,
+            })),
+            total: data.total,
+        }
+    } catch (error: any) {
+        if (error.name === 'AbortError') {
+            console.error('Market API timeout')
+            return { records: [], total: 0 }
+        }
+        console.error('Market prices error:', error)
+        return { records: [], total: 0 }
     }
 }
 // TODO: Integrate NIPHM for pest alerts
