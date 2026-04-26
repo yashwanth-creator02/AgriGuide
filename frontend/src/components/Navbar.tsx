@@ -13,6 +13,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/co
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
+import { getUser, isLoggedIn, logout } from '@/services/authService';
 
 const links = [
   { label: 'Home', path: '/' },
@@ -23,7 +24,13 @@ const links = [
 
 function Navbar() {
   const location = useLocation();
+  const user = getUser();
+  const loggedIn = isLoggedIn();
 
+  const handleLogout = () => {
+    logout();
+    window.location.href = '/';
+  };
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60">
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
@@ -62,18 +69,34 @@ function Navbar() {
         {/* Action Buttons & Mobile Menu */}
         <div className="flex items-center gap-3">
           <div className="hidden items-center gap-2 md:flex">
-            <Button variant="ghost" size="sm" asChild>
-              <Link to="/login" className="flex items-center gap-2">
-                <LogIn className="h-4 w-4" />
-                Log in
-              </Link>
-            </Button>
-            <Button size="sm" className="bg-green-700 hover:bg-green-800 shadow-md" asChild>
-              <Link to="/signup" className="flex items-center gap-2">
-                <UserPlus className="h-4 w-4" />
-                Get Started
-              </Link>
-            </Button>
+            {loggedIn ? (
+              <>
+                <span className="text-sm text-gray-600 font-medium">👋 {user?.name}</span>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleLogout}
+                  className="text-red-500 hover:text-red-600 hover:bg-red-50"
+                >
+                  Log out
+                </Button>
+              </>
+            ) : (
+              <>
+                <Button variant="ghost" size="sm" asChild>
+                  <Link to="/login" className="flex items-center gap-2">
+                    <LogIn className="h-4 w-4" />
+                    Log in
+                  </Link>
+                </Button>
+                <Button size="sm" className="bg-green-700 hover:bg-green-800 shadow-md" asChild>
+                  <Link to="/signup" className="flex items-center gap-2">
+                    <UserPlus className="h-4 w-4" />
+                    Get Started
+                  </Link>
+                </Button>
+              </>
+            )}
           </div>
 
           {/* Mobile Sheet Menu */}

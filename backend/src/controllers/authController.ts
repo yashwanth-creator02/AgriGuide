@@ -9,14 +9,14 @@ import { env } from '../config/env'
 // Signup
 export const signup = async (req: Request, res: Response) => {
     try {
-        const { name, email, password } = req.body
+        const { name, email, password, phone, location } = req.body
 
         if (!name || !email || !password) {
-            return res.status(400).json({ message: 'All fields are required' })
+            return res.status(400).json({ message: 'Name, email and password are required' })
         }
 
-        // Check if user already exists
-        const existing = await pool.query('SELECT * FROM users WHERE email = $1', [email])
+        // Check if email already exists
+        const existing = await pool.query('SELECT * FROM farmers WHERE email = $1', [email])
         if (existing.rows.length > 0) {
             return res.status(400).json({ message: 'Email already registered' })
         }
@@ -24,20 +24,22 @@ export const signup = async (req: Request, res: Response) => {
         // Hash password
         const hashedPassword = await bcrypt.hash(password, 10)
 
-        // Save user
+        // Save farmer
         const result = await pool.query(
-            'INSERT INTO users (name, email, password) VALUES ($1, $2, $3) RETURNING id, name, email',
-            [name, email, hashedPassword]
+            'INSERT INTO farmers (name, email, password, phone, location) VALUES ($1, $2, $3, $4, $5) RETURNING id, name, email, phone, location',
+            [name, email, hashedPassword, phone || '', location || '']
         )
 
-        const user = result.rows[0]
+        const farmer = result.rows[0]
 
         // Generate token
-        const token = jwt.sign({ id: user.id, email: user.email }, env.JWT_SECRET, {
-            expiresIn: '7d',
-        })
+        const token = jwt.sign(
+            { id: farmer.id, email: farmer.email },
+            env.JWT_SECRET,
+            { expiresIn: '7d' }
+        )
 
-        res.status(201).json({ token, user })
+        res.status(201).json({ token, user: farmer })
     } catch (error) {
         console.error('Signup error:', error)
         res.status(500).json({ message: 'Error creating account' })
@@ -53,45 +55,50 @@ export const login = async (req: Request, res: Response) => {
             return res.status(400).json({ message: 'Email and password are required' })
         }
 
-        // Find user
-        const result = await pool.query('SELECT * FROM users WHERE email = $1', [email])
+        // Find farmer
+        const result = await pool.query('SELECT * FROM farmers WHERE email = $1', [email])
         if (result.rows.length === 0) {
             return res.status(401).json({ message: 'Invalid email or password' })
         }
 
-        const user = result.rows[0]
+        const farmer = result.rows[0]
 
         // Check password
-        const isMatch = await bcrypt.compare(password, user.password)
+        const isMatch = await bcrypt.compare(password, farmer.password)
         if (!isMatch) {
             return res.status(401).json({ message: 'Invalid email or password' })
         }
 
         // Generate token
-        const token = jwt.sign({ id: user.id, email: user.email }, env.JWT_SECRET, {
-            expiresIn: '7d',
-        })
+        const token = jwt.sign(
+            { id: farmer.id, email: farmer.email },
+            env.JWT_SECRET,
+            { expiresIn: '7d' }
+        )
 
-        res.json({ token, user: { id: user.id, name: user.name, email: user.email } })
+        res.json({
+            token,
+            user: { id: farmer.id, name: farmer.name, email: farmer.email, phone: farmer.phone, location: farmer.location }
+        })
     } catch (error) {
         console.error('Login error:', error)
         res.status(500).json({ message: 'Error logging in' })
     }
 }
 
-// Get current user
+// Get current farmer
 export const getMe = async (req: Request, res: Response) => {
     try {
-        const userId = (req as any).user.id
+        const farmerId = (req as any).user.id
         const result = await pool.query(
-            'SELECT id, name, email, created_at FROM users WHERE id = $1',
-            [userId]
+            'SELECT id, name, email, phone, location, created_at FROM farmers WHERE id = $1',
+            [farmerId]
         )
         if (result.rows.length === 0) {
-            return res.status(404).json({ message: 'User not found' })
+            return res.status(404).json({ message: 'Farmer not found' })
         }
         res.json(result.rows[0])
     } catch (error) {
-        res.status(500).json({ message: 'Error fetching user' })
+        res.status(500).json({ message: 'Error fetching farmer' })
     }
 }

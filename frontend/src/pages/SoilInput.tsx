@@ -28,6 +28,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { saveSoilData } from '@/services/marketService';
+import { getFarmerId } from '@/services/authService';
 
 function SoilInput() {
   const navigate = useNavigate();
@@ -35,7 +36,7 @@ function SoilInput() {
   const [showMap, setShowMap] = useState(false);
 
   const [formData, setFormData] = useState({
-    farmer_id: 1,
+    farmer_id: getFarmerId(),
     soil_id: null,
     soilType: '',
     ph: '6.5',
