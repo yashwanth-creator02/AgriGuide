@@ -2,15 +2,16 @@
 
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Layout from './components/Layout';
+import ProtectedRoute from './components/ProtectedRoute';
 import Home from './pages/Home';
 import SoilInput from './pages/SoilInput';
 import CropInfo from './pages/CropInfo';
 import Results from './pages/Results';
 import MarketPrices from './pages/MarketPrices';
 import PestAlerts from './pages/PestAlerts';
-import NotFound from './pages/NotFound';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
+import NotFound from './pages/NotFound';
 
 function App() {
   return (
@@ -18,11 +19,46 @@ function App() {
       <Routes>
         <Route path="/" element={<Layout />}>
           <Route index element={<Home />} />
-          <Route path="soil-input" element={<SoilInput />} />
-          <Route path="crop-info" element={<CropInfo />} />
-          <Route path="results" element={<Results />} />
-          <Route path="market-prices" element={<MarketPrices />} />
-          <Route path="pest-alerts" element={<PestAlerts />} />
+          <Route
+            path="soil-input"
+            element={
+              <ProtectedRoute>
+                <SoilInput />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="results"
+            element={
+              <ProtectedRoute>
+                <Results />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="crop-info"
+            element={
+              <ProtectedRoute>
+                <CropInfo />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="market-prices"
+            element={
+              <ProtectedRoute>
+                <MarketPrices />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="pest-alerts"
+            element={
+              <ProtectedRoute>
+                <PestAlerts />
+              </ProtectedRoute>
+            }
+          />
         </Route>
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
