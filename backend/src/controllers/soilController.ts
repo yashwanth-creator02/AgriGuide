@@ -58,3 +58,33 @@ export const deleteSoilData = async (req: Request, res: Response) => {
         res.status(500).json({ message: 'Error deleting soil data' })
     }
 }
+
+// Get soil data with recommendations by farmer
+export const getSoilWithRecommendations = async (req: Request, res: Response) => {
+    try {
+        const { farmer_id } = req.params
+
+        const soilResult = await pool.query(
+            'SELECT * FROM soil_data WHERE farmer_id = $1 ORDER BY created_at DESC',
+            [farmer_id]
+        )
+
+        const history = await Promise.all(
+            soilResult.rows.map(async (soil) => {
+                const recResult = await pool.query(
+                    'SELECT * FROM recommendations WHERE soil_id = $1 ORDER BY suitability_score DESC',
+                    [soil.id]
+                )
+                return {
+                    ...soil,
+                    recommendations: recResult.rows,
+                }
+            })
+        )
+
+        res.json(history)
+    } catch (error) {
+        console.error('History error:', error)
+        res.status(500).json({ message: 'Error fetching history' })
+    }
+}

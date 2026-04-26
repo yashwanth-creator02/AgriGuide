@@ -103,6 +103,7 @@ function Signup() {
                 <Input
                   type="password"
                   name="confirm"
+                  autoComplete="new-password"
                   value={formData.confirm}
                   onChange={handleChange}
                   placeholder="••••••••"

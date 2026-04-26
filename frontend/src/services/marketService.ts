@@ -31,3 +31,9 @@ export const saveSoilData = async (soilData: any) => {
   if (!response.ok) throw new Error('Failed to save soil data')
   return response.json()
 }
+
+export const fetchHistory = async (farmer_id: number) => {
+  const response = await fetch(`${API_URL}/soil/history/${farmer_id}`)
+  if (!response.ok) throw new Error('Failed to fetch history')
+  return response.json()
+}

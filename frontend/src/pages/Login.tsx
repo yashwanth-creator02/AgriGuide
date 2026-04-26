@@ -70,6 +70,7 @@ function Login() {
                 <Input
                   type="password"
                   name="password"
+                  autoComplete="current-password"
                   value={formData.password}
                   onChange={handleChange}
                   placeholder="••••••••"
