@@ -2,9 +2,8 @@
 
 import { Request, Response } from 'express'
 import pool from '../config/db'
+import { getAllCrops } from '../services/cropService'
 import { generateRecommendations } from '../services/recommendService'
-
-// Simple crop database for scoring logic
 
 // Get recommendations
 export const getRecommendations = async (req: Request, res: Response) => {
@@ -13,15 +12,23 @@ export const getRecommendations = async (req: Request, res: Response) => {
 
         const soilData = { soil_type, ph, nitrogen, phosphorus, potassium, season }
 
-        // Score all crops
-        const scored = generateRecommendations(soilData)
-        console.log('Scored crops:', scored)
-        // Save recommendations to database
+        // Fetch crops from database
+        const cropsFromDb = await getAllCrops()
+
+        // Generate recommendations
+        const scored = generateRecommendations(soilData, farmer_id, cropsFromDb)
+
+        if (scored.length === 0) {
+            return res.status(404).json({ message: 'No suitable crops found for the given soil data' })
+        }
+
+        // Save recommendations to database with soil_snapshot
         for (const rec of scored) {
             await pool.query(
-                `INSERT INTO recommendations (farmer_id, soil_id, crop_name, suitability_score, reason)
-         VALUES ($1, $2, $3, $4, $5)`,
-                [farmer_id, soil_id, rec.crop_name, rec.suitability_score, rec.reason]
+                `INSERT INTO recommendations 
+          (farmer_id, soil_id, crop_name, suitability_score, reason, soil_snapshot)
+         VALUES ($1, $2, $3, $4, $5, $6)`,
+                [farmer_id, soil_id, rec.crop_name, rec.suitability_score, rec.reason, rec.soil_snapshot]
             )
         }
 

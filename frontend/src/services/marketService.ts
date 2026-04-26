@@ -37,3 +37,9 @@ export const fetchHistory = async (farmer_id: number) => {
   if (!response.ok) throw new Error('Failed to fetch history')
   return response.json()
 }
+
+export const fetchPestAlerts = async () => {
+  const response = await fetch(`${API_URL}/pests`)
+  if (!response.ok) throw new Error('Failed to fetch pest alerts')
+  return response.json()
+}

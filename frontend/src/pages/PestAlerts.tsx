@@ -1,63 +1,41 @@
 // frontend/src/pages/PestAlerts.tsx
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import AlertBanner from '../components/AlertBanner';
-
-const alertsData = [
-  {
-    id: 1,
-    pest_name: 'Fall Armyworm',
-    affected_crop: 'Maize',
-    region: 'Karnataka, Andhra Pradesh',
-    severity: 'High' as const,
-    description: 'Widespread infestation reported. Apply recommended pesticides immediately.',
-  },
-  {
-    id: 2,
-    pest_name: 'Brown Plant Hopper',
-    affected_crop: 'Rice',
-    region: 'Tamil Nadu, Kerala',
-    severity: 'Medium' as const,
-    description: 'Moderate spread detected. Monitor fields closely and drain excess water.',
-  },
-  {
-    id: 3,
-    pest_name: 'Aphids',
-    affected_crop: 'Wheat',
-    region: 'Punjab, Haryana',
-    severity: 'Low' as const,
-    description: 'Minor presence observed. Use neem-based sprays as a precaution.',
-  },
-  {
-    id: 4,
-    pest_name: 'Whitefly',
-    affected_crop: 'Cotton',
-    region: 'Gujarat, Rajasthan',
-    severity: 'High' as const,
-    description: 'Severe outbreak reported. Consult local agricultural officer immediately.',
-  },
-  {
-    id: 5,
-    pest_name: 'Stem Borer',
-    affected_crop: 'Sugarcane',
-    region: 'Uttar Pradesh, Bihar',
-    severity: 'Medium' as const,
-    description: 'Moderate infestation detected. Apply carbofuran granules near root zone.',
-  },
-];
+import { fetchPestAlerts } from '@/services/marketService';
 
 const SEVERITY_OPTIONS = ['All', 'High', 'Medium', 'Low'];
-const CROP_OPTIONS = ['All', ...new Set(alertsData.map((a) => a.affected_crop))];
 
 function PestAlerts() {
+  const [alerts, setAlerts] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [severityFilter, setSeverityFilter] = useState('All');
   const [cropFilter, setCropFilter] = useState('All');
 
-  const filtered = alertsData.filter((alert) => {
+  useEffect(() => {
+    fetchPestAlerts()
+      .then(setAlerts)
+      .catch((err) => setError(err.message))
+      .finally(() => setLoading(false));
+  }, []);
+
+  const cropOptions = ['All', ...new Set(alerts.map((a) => a.affected_crop))];
+
+  const filtered = alerts.filter((alert) => {
     const matchSeverity = severityFilter === 'All' || alert.severity === severityFilter;
     const matchCrop = cropFilter === 'All' || alert.affected_crop === cropFilter;
     return matchSeverity && matchCrop;
   });
+
+  if (loading)
+    return (
+      <div className="min-h-screen flex items-center justify-center text-gray-400">Loading...</div>
+    );
+  if (error)
+    return (
+      <div className="min-h-screen flex items-center justify-center text-red-500">{error}</div>
+    );
 
   return (
     <div className="min-h-screen bg-gray-50 py-12 px-6">
@@ -88,7 +66,7 @@ function PestAlerts() {
               onChange={(e) => setCropFilter(e.target.value)}
               className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
             >
-              {CROP_OPTIONS.map((c) => (
+              {cropOptions.map((c) => (
                 <option key={c} value={c}>
                   {c}
                 </option>
@@ -131,7 +109,7 @@ function PestAlerts() {
         )}
 
         <p className="text-xs text-gray-400 mt-8 text-center">
-          Showing {filtered.length} of {alertsData.length} alerts
+          Showing {filtered.length} of {alerts.length} alerts
         </p>
       </div>
     </div>

@@ -6,7 +6,8 @@ import { getAllCrops, getCropDetails } from '../services/cropService'
 // Get all crops
 export const getCrops = async (req: Request, res: Response) => {
     try {
-        res.json(getAllCrops())
+        const crops = await getAllCrops()
+        res.json(crops)
     } catch (error) {
         res.status(500).json({ message: 'Error fetching crops' })
     }
@@ -16,7 +17,7 @@ export const getCrops = async (req: Request, res: Response) => {
 export const getCropByName = async (req: Request, res: Response) => {
     try {
         const { name } = req.params
-        const crop = getCropDetails(name as string)
+        const crop = await getCropDetails(name as string)
         if (!crop) {
             return res.status(404).json({ message: 'Crop not found' })
         }
