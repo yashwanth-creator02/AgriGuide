@@ -2,27 +2,63 @@
 
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { fetchHistory } from '@/services/soilService';
+import { fetchHistory, deleteSoilEntry } from '@/services/soilService';
 import { getFarmerId } from '@/services/authService';
-import { Clock, Leaf, MapPin, FlaskConical, ChevronDown, ChevronUp } from 'lucide-react';
-import { Home } from 'lucide-react';
-import { Skeleton } from '@/components/ui/skeleton';
+import {
+  Clock,
+  Leaf,
+  MapPin,
+  FlaskConical,
+  ChevronDown,
+  ChevronUp,
+  Trash2,
+  Search,
+  Home,
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Skeleton } from '@/components/ui/skeleton';
+import { toast } from 'sonner';
 
 function History() {
   const [history, setHistory] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [expanded, setExpanded] = useState<number | null>(null);
+  const [search, setSearch] = useState('');
+  const [deletingId, setDeletingId] = useState<number | null>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
     const farmer_id = getFarmerId();
     fetchHistory(farmer_id)
       .then(setHistory)
-      .catch((err) => setError(err.message))
+      .catch((err) => toast.error(err.message))
       .finally(() => setLoading(false));
   }, []);
+
+  const handleDelete = async (id: number) => {
+    if (!confirm('Are you sure you want to delete this entry?')) return;
+    setDeletingId(id);
+    try {
+      await deleteSoilEntry(id);
+      setHistory(history.filter((h) => h.id !== id));
+      toast.success('Entry deleted successfully');
+    } catch (err: any) {
+      toast.error(err.message || 'Failed to delete entry');
+    } finally {
+      setDeletingId(null);
+    }
+  };
+
+  const filtered = history.filter((entry) => {
+    const q = search.toLowerCase();
+    return (
+      entry.location?.toLowerCase().includes(q) ||
+      entry.season?.toLowerCase().includes(q) ||
+      entry.soil_type?.toLowerCase().includes(q) ||
+      entry.recommendations?.some((r: any) => r.crop_name.toLowerCase().includes(q))
+    );
+  });
 
   if (loading)
     return (
@@ -40,11 +76,6 @@ function History() {
           ))}
         </div>
       </div>
-    );
-
-  if (error)
-    return (
-      <div className="min-h-screen flex items-center justify-center text-red-500">{error}</div>
     );
 
   return (
@@ -67,6 +98,19 @@ function History() {
             Home
           </Button>
         </div>
+
+        {/* Search */}
+        {history.length > 0 && (
+          <div className="relative mb-6">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+            <Input
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search by location, season, soil type or crop..."
+              className="pl-10 rounded-xl border-gray-200"
+            />
+          </div>
+        )}
 
         {history.length === 0 ? (
           <div className="bg-white rounded-xl shadow p-12 text-center">
@@ -195,16 +239,20 @@ function History() {
               Start Soil Analysis
             </button>
           </div>
+        ) : filtered.length === 0 ? (
+          <div className="bg-white rounded-xl shadow p-12 text-center">
+            <p className="text-gray-400 text-sm">No results found for "{search}"</p>
+          </div>
         ) : (
           <div className="space-y-4">
-            {history.map((entry, index) => (
+            {filtered.map((entry, index) => (
               <div key={entry.id} className="bg-white rounded-xl shadow overflow-hidden">
                 {/* Header */}
-                <div
-                  className="p-6 cursor-pointer flex items-center justify-between hover:bg-gray-50 transition"
-                  onClick={() => setExpanded(expanded === entry.id ? null : entry.id)}
-                >
-                  <div className="flex items-center gap-4">
+                <div className="p-6 flex items-center justify-between hover:bg-gray-50 transition">
+                  <div
+                    className="flex items-center gap-4 flex-1 cursor-pointer"
+                    onClick={() => setExpanded(expanded === entry.id ? null : entry.id)}
+                  >
                     <div className="bg-green-100 p-3 rounded-xl">
                       <FlaskConical className="h-5 w-5 text-green-700" />
                     </div>
@@ -230,11 +278,25 @@ function History() {
                       </div>
                     </div>
                   </div>
-                  {expanded === entry.id ? (
-                    <ChevronUp className="h-4 w-4 text-gray-400" />
-                  ) : (
-                    <ChevronDown className="h-4 w-4 text-gray-400" />
-                  )}
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => handleDelete(entry.id)}
+                      disabled={deletingId === entry.id}
+                      className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                    <button
+                      onClick={() => setExpanded(expanded === entry.id ? null : entry.id)}
+                      className="p-2 text-gray-400 hover:bg-gray-100 rounded-lg transition"
+                    >
+                      {expanded === entry.id ? (
+                        <ChevronUp className="h-4 w-4" />
+                      ) : (
+                        <ChevronDown className="h-4 w-4" />
+                      )}
+                    </button>
+                  </div>
                 </div>
 
                 {/* Expanded Content */}
@@ -294,6 +356,10 @@ function History() {
             ))}
           </div>
         )}
+
+        <p className="text-xs text-gray-400 mt-8 text-center">
+          Showing {filtered.length} of {history.length} entries
+        </p>
       </div>
     </div>
   );

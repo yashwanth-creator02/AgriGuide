@@ -17,3 +17,11 @@ export const fetchHistory = async (farmer_id: number) => {
   if (!response.ok) throw new Error('Failed to fetch history')
   return response.json()
 }
+
+export const deleteSoilEntry = async (id: number) => {
+  const response = await fetch(`${API_URL}/soil/history/${id}`, {
+    method: 'DELETE',
+  })
+  if (!response.ok) throw new Error('Failed to delete entry')
+  return response.json()
+}
