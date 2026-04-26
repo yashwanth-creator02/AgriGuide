@@ -1,7 +1,8 @@
 // frontend/src/pages/PestAlerts.tsx
 
 import { useState, useEffect } from 'react';
-import AlertBanner from '../components/AlertBanner';
+import { Skeleton } from '@/components/ui/skeleton';
+import AlertBanner from '@/components/AlertBanner';
 import { fetchPestAlerts } from '@/services/pestService';
 
 const SEVERITY_OPTIONS = ['All', 'High', 'Medium', 'Low'];
@@ -30,7 +31,19 @@ function PestAlerts() {
 
   if (loading)
     return (
-      <div className="min-h-screen flex items-center justify-center text-gray-400">Loading...</div>
+      <div className="min-h-screen bg-gray-50 py-12 px-6">
+        <div className="max-w-3xl mx-auto space-y-4">
+          <Skeleton className="h-8 w-48" />
+          <Skeleton className="h-4 w-72" />
+          <div className="flex gap-4 mb-8">
+            <Skeleton className="h-12 flex-1" />
+            <Skeleton className="h-12 flex-1" />
+          </div>
+          {[...Array(5)].map((_, i) => (
+            <Skeleton key={i} className="h-36 w-full rounded-xl" />
+          ))}
+        </div>
+      </div>
     );
   if (error)
     return (

@@ -1,5 +1,6 @@
 // frontend/src/pages/MarketPrices.tsx
 
+import { Skeleton } from '@/components/ui/skeleton';
 import { useState, useEffect } from 'react';
 import { fetchMarketPrices } from '../services/marketService';
 
@@ -30,7 +31,19 @@ function MarketPrices() {
 
   if (loading)
     return (
-      <div className="min-h-screen flex items-center justify-center text-gray-400">Loading...</div>
+      <div className="min-h-screen bg-gray-50 py-12 px-6">
+        <div className="max-w-5xl mx-auto space-y-4">
+          <Skeleton className="h-8 w-48" />
+          <Skeleton className="h-4 w-72" />
+          <Skeleton className="h-12 w-full" />
+          <div className="bg-white rounded-xl shadow overflow-hidden">
+            <Skeleton className="h-12 w-full" />
+            {[...Array(6)].map((_, i) => (
+              <Skeleton key={i} className="h-16 w-full mt-1" />
+            ))}
+          </div>
+        </div>
+      </div>
     );
   if (error)
     return (

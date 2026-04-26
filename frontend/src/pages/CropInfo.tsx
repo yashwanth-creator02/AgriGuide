@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { fetchCrops } from '@/services/cropService';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Skeleton } from '@/components/ui/skeleton';
 
 function CropInfo() {
   const [crops, setCrops] = useState<any[]>([]);
@@ -21,7 +22,16 @@ function CropInfo() {
 
   if (loading)
     return (
-      <div className="min-h-screen flex items-center justify-center text-gray-400">Loading...</div>
+      <div className="min-h-screen bg-gray-50 py-12 px-6">
+        <div className="max-w-2xl mx-auto space-y-4">
+          <Skeleton className="h-8 w-48" />
+          <Skeleton className="h-4 w-72" />
+          <Skeleton className="h-12 w-full" />
+          <Skeleton className="h-32 w-full rounded-xl" />
+          <Skeleton className="h-32 w-full rounded-xl" />
+          <Skeleton className="h-32 w-full rounded-xl" />
+        </div>
+      </div>
     );
   if (error)
     return (

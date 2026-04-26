@@ -47,6 +47,34 @@ function SoilInput() {
     season: '',
   });
 
+  const [formErrors, setFormErrors] = useState<Record<string, string>>({});
+
+  const validate = () => {
+    const errors: Record<string, string> = {};
+
+    if (!formData.soilType) errors.soilType = 'Soil type is required';
+    if (!formData.location) errors.location = 'Location is required';
+    if (!formData.season) errors.season = 'Season is required';
+
+    const ph = Number(formData.ph);
+    if (!formData.ph) errors.ph = 'pH is required';
+    else if (ph < 0 || ph > 14) errors.ph = 'pH must be between 0 and 14';
+
+    const nitrogen = Number(formData.nitrogen);
+    if (!formData.nitrogen) errors.nitrogen = 'Required';
+    else if (nitrogen < 0) errors.nitrogen = 'Must be positive';
+
+    const phosphorus = Number(formData.phosphorus);
+    if (!formData.phosphorus) errors.phosphorus = 'Required';
+    else if (phosphorus < 0) errors.phosphorus = 'Must be positive';
+
+    const potassium = Number(formData.potassium);
+    if (!formData.potassium) errors.potassium = 'Required';
+    else if (potassium < 0) errors.potassium = 'Must be positive';
+
+    return errors;
+  };
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
@@ -61,6 +89,15 @@ function SoilInput() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    const errors = validate();
+    if (Object.keys(errors).length > 0) {
+      setFormErrors(errors);
+      toast.error('Please fix the errors before submitting');
+      return;
+    }
+
+    setFormErrors({});
     try {
       const soilData = {
         farmer_id: formData.farmer_id,
@@ -154,6 +191,9 @@ function SoilInput() {
                           <SelectItem value="black soil">Black Soil</SelectItem>
                         </SelectContent>
                       </Select>
+                      {formErrors.soilType && (
+                        <p className="text-xs text-red-500 ml-1 mt-1">{formErrors.soilType}</p>
+                      )}
                     </div>
 
                     {/* Location with Map Picker */}
@@ -182,7 +222,10 @@ function SoilInput() {
                           </Tooltip>
                         </TooltipProvider>
                       </div>
-                      {formData.location && (
+                      {formErrors.location && (
+                        <p className="text-xs text-red-500 ml-1 mt-1">{formErrors.location}</p>
+                      )}
+                      {formData.location && !formErrors.location && (
                         <p className="text-xs text-green-600 ml-1 flex items-center gap-1">
                           <MapPin className="h-3 w-3" /> {formData.location}
                         </p>
@@ -238,6 +281,9 @@ function SoilInput() {
                           className="h-11 bg-white/50 border-slate-200 focus:bg-white transition-all rounded-xl"
                           onChange={handleChange}
                         />
+                        {formErrors[field.name] && (
+                          <p className="text-xs text-red-500 ml-1 mt-1">{formErrors[field.name]}</p>
+                        )}
                       </div>
                     ))}
                   </div>
@@ -258,6 +304,9 @@ function SoilInput() {
                       <SelectItem value="zaid">Zaid (Summer)</SelectItem>
                     </SelectContent>
                   </Select>
+                  {formErrors.season && (
+                    <p className="text-xs text-red-500 ml-1 mt-1">{formErrors.season}</p>
+                  )}
                 </section>
 
                 <Button

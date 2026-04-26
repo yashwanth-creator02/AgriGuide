@@ -6,6 +6,7 @@ import { fetchHistory } from '@/services/soilService';
 import { getFarmerId } from '@/services/authService';
 import { Clock, Leaf, MapPin, FlaskConical, ChevronDown, ChevronUp } from 'lucide-react';
 import { Home } from 'lucide-react';
+import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 
 function History() {
@@ -25,8 +26,19 @@ function History() {
 
   if (loading)
     return (
-      <div className="min-h-screen flex items-center justify-center text-gray-400">
-        Loading history...
+      <div className="min-h-screen bg-gray-50 py-12 px-6">
+        <div className="max-w-3xl mx-auto space-y-4">
+          <div className="flex items-center justify-between mb-8">
+            <div className="space-y-2">
+              <Skeleton className="h-8 w-48" />
+              <Skeleton className="h-4 w-72" />
+            </div>
+            <Skeleton className="h-10 w-24" />
+          </div>
+          {[...Array(3)].map((_, i) => (
+            <Skeleton key={i} className="h-24 w-full rounded-xl" />
+          ))}
+        </div>
       </div>
     );
 
