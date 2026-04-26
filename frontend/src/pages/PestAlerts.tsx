@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import AlertBanner from '../components/AlertBanner';
-import { fetchPestAlerts } from '@/services/marketService';
+import { fetchPestAlerts } from '@/services/pestService';
 
 const SEVERITY_OPTIONS = ['All', 'High', 'Medium', 'Low'];
 

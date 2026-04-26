@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { fetchHistory } from '@/services/marketService';
+import { fetchHistory } from '@/services/soilService';
 import { getFarmerId } from '@/services/authService';
 import { Clock, Leaf, MapPin, FlaskConical, ChevronDown, ChevronUp } from 'lucide-react';
 import { Home } from 'lucide-react';

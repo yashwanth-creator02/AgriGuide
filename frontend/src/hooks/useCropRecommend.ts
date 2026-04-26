@@ -1,7 +1,7 @@
 // frontend/src/hooks/useCropRecommend.ts
 
 import { useState } from 'react'
-import { fetchRecommendations } from '../services/marketService'
+import { fetchRecommendations } from '@/services/recommendService'
 
 export const useCropRecommend = () => {
   const [recommendations, setRecommendations] = useState<any[]>([])

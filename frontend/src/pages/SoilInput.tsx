@@ -27,7 +27,7 @@ import {
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { saveSoilData } from '@/services/marketService';
+import { saveSoilData } from '@/services/soilService';
 import { getFarmerId } from '@/services/authService';
 
 function SoilInput() {
