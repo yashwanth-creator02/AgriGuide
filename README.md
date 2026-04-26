@@ -154,11 +154,3 @@ farmers (id, name, email, password, phone, location, created_at)
 ## License
 
 MIT
-
-```
-
-If you want to take this to the next level, I can:
-- :contentReference[oaicite:0]{index=0}
-- :contentReference[oaicite:1]{index=1}
-- :contentReference[oaicite:2]{index=2}
-```
