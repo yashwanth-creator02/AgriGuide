@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { toast } from 'sonner';
 
 function Signup() {
   const navigate = useNavigate();
@@ -24,10 +25,12 @@ function Signup() {
     setError(null);
 
     if (formData.password !== formData.confirm) {
+      toast.error('Passwords do not match');
       return setError('Passwords do not match');
     }
 
     if (formData.password.length < 6) {
+      toast.error('Password must be at least 6 characters');
       return setError('Password must be at least 6 characters');
     }
 
@@ -36,9 +39,11 @@ function Signup() {
       const data = await signup(formData.name, formData.email, formData.password);
       localStorage.setItem('token', data.token);
       localStorage.setItem('user', JSON.stringify(data.user));
+      toast.success(`Welcome to AgriGuide, ${data.user.name}!`);
       navigate('/');
     } catch (err: any) {
       setError(err.message);
+      toast.error(err.message || 'Signup failed. Please try again.');
     } finally {
       setLoading(false);
     }

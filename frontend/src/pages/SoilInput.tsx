@@ -13,7 +13,7 @@ import {
 } from 'lucide-react';
 import { useCropRecommend } from '@/hooks/useCropRecommend';
 import MapPicker from '@/components/MapPicker';
-
+import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -61,33 +61,33 @@ function SoilInput() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const soilData = {
-      farmer_id: formData.farmer_id,
-      soil_type: formData.soilType,
-      ph: Number(formData.ph),
-      nitrogen: Number(formData.nitrogen),
-      phosphorus: Number(formData.phosphorus),
-      potassium: Number(formData.potassium),
-      location: formData.location,
-      season: formData.season,
-    };
-
-    console.log('Submitting soil data:', soilData); // add this
-
     try {
-      // Step 1: Save soil data first
-      const savedSoil = await saveSoilData(soilData);
-      console.log('Saved soil:', savedSoil); // add this
+      const soilData = {
+        farmer_id: formData.farmer_id,
+        soil_type: formData.soilType,
+        ph: Number(formData.ph),
+        nitrogen: Number(formData.nitrogen),
+        phosphorus: Number(formData.phosphorus),
+        potassium: Number(formData.potassium),
+        location: formData.location,
+        season: formData.season,
+      };
 
-      // Step 2: Get recommendations using soil_id
+      const savedSoil = await saveSoilData(soilData);
       const results = await getRecommendations({
         ...soilData,
         soil_id: savedSoil.id,
       });
 
+      if (!results || results.length === 0) {
+        toast.warning('No suitable crops found for your soil data. Try adjusting the values.');
+        return;
+      }
+
+      toast.success('Recommendations generated successfully!');
       navigate('/results', { state: { results, location: formData.location } });
-    } catch (err) {
-      console.error('Submit error:', err); // add this
+    } catch (err: any) {
+      toast.error(err.message || 'Something went wrong. Please try again.');
     }
   };
 
