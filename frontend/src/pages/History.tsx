@@ -70,12 +70,129 @@ function History() {
 
         {history.length === 0 ? (
           <div className="bg-white rounded-xl shadow p-12 text-center">
-            <p className="text-gray-400 text-sm mb-4">No history found.</p>
+            <div className="flex justify-center mb-6">
+              <svg
+                viewBox="0 0 200 200"
+                className="w-40 h-40"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                {/* Sun */}
+                <circle cx="100" cy="60" r="20" fill="#FCD34D" />
+                <line
+                  x1="100"
+                  y1="30"
+                  x2="100"
+                  y2="20"
+                  stroke="#FCD34D"
+                  strokeWidth="3"
+                  strokeLinecap="round"
+                />
+                <line
+                  x1="100"
+                  y1="90"
+                  x2="100"
+                  y2="100"
+                  stroke="#FCD34D"
+                  strokeWidth="3"
+                  strokeLinecap="round"
+                />
+                <line
+                  x1="70"
+                  y1="60"
+                  x2="60"
+                  y2="60"
+                  stroke="#FCD34D"
+                  strokeWidth="3"
+                  strokeLinecap="round"
+                />
+                <line
+                  x1="130"
+                  y1="60"
+                  x2="140"
+                  y2="60"
+                  stroke="#FCD34D"
+                  strokeWidth="3"
+                  strokeLinecap="round"
+                />
+                <line
+                  x1="79"
+                  y1="39"
+                  x2="72"
+                  y2="32"
+                  stroke="#FCD34D"
+                  strokeWidth="3"
+                  strokeLinecap="round"
+                />
+                <line
+                  x1="121"
+                  y1="81"
+                  x2="128"
+                  y2="88"
+                  stroke="#FCD34D"
+                  strokeWidth="3"
+                  strokeLinecap="round"
+                />
+                <line
+                  x1="121"
+                  y1="39"
+                  x2="128"
+                  y2="32"
+                  stroke="#FCD34D"
+                  strokeWidth="3"
+                  strokeLinecap="round"
+                />
+                <line
+                  x1="79"
+                  y1="81"
+                  x2="72"
+                  y2="88"
+                  stroke="#FCD34D"
+                  strokeWidth="3"
+                  strokeLinecap="round"
+                />
+                {/* Ground */}
+                <rect x="20" y="150" width="160" height="20" rx="4" fill="#92400E" opacity="0.3" />
+                {/* Plant stem */}
+                <line
+                  x1="100"
+                  y1="150"
+                  x2="100"
+                  y2="110"
+                  stroke="#16A34A"
+                  strokeWidth="4"
+                  strokeLinecap="round"
+                />
+                {/* Leaves */}
+                <ellipse
+                  cx="80"
+                  cy="130"
+                  rx="20"
+                  ry="10"
+                  fill="#16A34A"
+                  transform="rotate(-30 80 130)"
+                />
+                <ellipse
+                  cx="120"
+                  cy="125"
+                  rx="20"
+                  ry="10"
+                  fill="#22C55E"
+                  transform="rotate(30 120 125)"
+                />
+                {/* Pot */}
+                <path d="M75 150 L85 180 L115 180 L125 150 Z" fill="#92400E" opacity="0.5" />
+              </svg>
+            </div>
+            <h3 className="text-lg font-semibold text-gray-700 mb-2">No analyses yet</h3>
+            <p className="text-gray-400 text-sm mb-6 max-w-xs mx-auto">
+              Start your first soil analysis to get personalized crop recommendations for your farm.
+            </p>
             <button
               onClick={() => navigate('/soil-input')}
-              className="text-green-700 text-sm font-medium hover:underline"
+              className="bg-green-700 text-white px-6 py-2.5 rounded-xl text-sm font-semibold hover:bg-green-800 transition"
             >
-              Start your first soil analysis →
+              Start Soil Analysis
             </button>
           </div>
         ) : (
