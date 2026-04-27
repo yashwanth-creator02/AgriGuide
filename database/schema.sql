@@ -1,11 +1,9 @@
--- AgriGuide Database Schema
--- 1. Crops Table (Independent)
--- Added UNIQUE name, updated_at, and image_url
-CREATE TABLE crops (
+-- 1. Crops Table
+CREATE TABLE IF NOT EXISTS crops (
     id SERIAL PRIMARY KEY,
     name VARCHAR(100) UNIQUE NOT NULL,
     season VARCHAR(20) CHECK (season IN ('kharif', 'rabi', 'zaid')),
-    suitable_soil TEXT[], -- PostgreSQL Array type
+    suitable_soil TEXT[], 
     min_ph DECIMAL(3,1),
     max_ph DECIMAL(3,1),
     min_nitrogen DECIMAL(6,2),
@@ -22,8 +20,8 @@ CREATE TABLE crops (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- 2. Farmer Table (Combined Farmer/User Auth)
-CREATE TABLE farmers (
+-- 2. Farmers Table (The main user table)
+CREATE TABLE IF NOT EXISTS farmers (
     id SERIAL PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
     email VARCHAR(150) UNIQUE NOT NULL,
@@ -34,11 +32,10 @@ CREATE TABLE farmers (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- 3. Soil Data Table
--- Added Indexing for location and season
-CREATE TABLE soil_data (
+-- 3. Soil Data Table (Corrected reference to 'farmers')
+CREATE TABLE IF NOT EXISTS soil_data (
     id SERIAL PRIMARY KEY,
-    user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+    user_id INTEGER REFERENCES farmers(id) ON DELETE CASCADE,
     soil_type VARCHAR(50) NOT NULL,
     ph DECIMAL(3,1) NOT NULL,
     nitrogen DECIMAL(6,2) NOT NULL,
@@ -50,26 +47,24 @@ CREATE TABLE soil_data (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE INDEX idx_soil_location ON soil_data(location);
-CREATE INDEX idx_soil_season ON soil_data(season);
+CREATE INDEX IF NOT EXISTS idx_soil_location ON soil_data(location);
+CREATE INDEX IF NOT EXISTS idx_soil_season ON soil_data(season);
 
--- 4. Recommendations Table
--- Added soil_snapshot (JSONB) to preserve context even if soil_data is deleted
-CREATE TABLE recommendations (
+-- 4. Recommendations Table (Corrected reference to 'farmers')
+CREATE TABLE IF NOT EXISTS recommendations (
     id SERIAL PRIMARY KEY,
-    user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+    user_id INTEGER REFERENCES farmers(id) ON DELETE CASCADE,
     soil_id INTEGER REFERENCES soil_data(id) ON DELETE SET NULL, 
     crop_name VARCHAR(100),
     suitability_score DECIMAL(5,2),
     reason TEXT,
-    soil_snapshot JSONB, -- Stores {ph: 6.5, n: 100, p: 50, k: 30}
+    soil_snapshot JSONB, 
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- 5. Pest Alerts Table
--- Linked to crops.id via Foreign Key
-CREATE TABLE pest_alerts (
+CREATE TABLE IF NOT EXISTS pest_alerts (
     id SERIAL PRIMARY KEY,
     pest_name VARCHAR(100) NOT NULL,
     crop_id INTEGER REFERENCES crops(id) ON DELETE SET NULL,
