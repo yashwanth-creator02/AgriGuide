@@ -50,23 +50,31 @@ function Signup() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 to-white flex items-center justify-center px-4">
-      <div className="w-full max-w-md">
+    <div className="min-h-screen flex items-center justify-center px-4 bg-gradient-to-br from-green-50 via-white to-slate-50 relative overflow-hidden">
+      {/* subtle background glow */}
+      <div className="absolute w-[500px] h-[500px] bg-green-200/20 rounded-full blur-[120px] -top-32 -right-32" />
+      <div className="absolute w-[400px] h-[400px] bg-slate-200/30 rounded-full blur-[100px] -bottom-32 -left-32" />
+
+      <div className="w-full max-w-md relative z-10">
         {/* Logo */}
-        <div className="flex items-center justify-center gap-2 mb-8">
-          <div className="bg-green-600 p-2 rounded-xl">
+        <div className="flex items-center justify-center gap-2 mb-10">
+          <div className="bg-green-600 p-2 rounded-xl shadow-md">
             <Sprout className="h-6 w-6 text-white" />
           </div>
-          <span className="text-2xl font-bold text-green-900">AgriGuide</span>
+          <span className="text-2xl font-bold text-green-900 tracking-tight">AgriGuide</span>
         </div>
 
-        <Card className="shadow-xl rounded-2xl border-white/60">
+        <Card className="rounded-2xl border-white/60 bg-white/70 backdrop-blur-xl shadow-2xl">
           <CardHeader className="text-center pb-2">
             <CardTitle className="text-2xl font-bold text-gray-800">Create account</CardTitle>
-            <CardDescription>Join AgriGuide and start farming smarter</CardDescription>
+            <CardDescription className="text-gray-500">
+              Join AgriGuide and start farming smarter
+            </CardDescription>
           </CardHeader>
+
           <CardContent className="p-8">
             <form onSubmit={handleSubmit} className="space-y-5">
+              {/* Name */}
               <div className="space-y-2">
                 <Label>Full Name</Label>
                 <Input
@@ -75,10 +83,12 @@ function Signup() {
                   value={formData.name}
                   onChange={handleChange}
                   placeholder="John Doe"
-                  className="h-11 rounded-xl"
+                  className="h-11 rounded-xl focus:ring-2 focus:ring-green-500"
                   required
                 />
               </div>
+
+              {/* Email */}
               <div className="space-y-2">
                 <Label>Email</Label>
                 <Input
@@ -87,10 +97,12 @@ function Signup() {
                   value={formData.email}
                   onChange={handleChange}
                   placeholder="you@example.com"
-                  className="h-11 rounded-xl"
+                  className="h-11 rounded-xl focus:ring-2 focus:ring-green-500"
                   required
                 />
               </div>
+
+              {/* Password */}
               <div className="space-y-2">
                 <Label>Password</Label>
                 <Input
@@ -99,32 +111,37 @@ function Signup() {
                   value={formData.password}
                   onChange={handleChange}
                   placeholder="••••••••"
-                  className="h-11 rounded-xl"
+                  className="h-11 rounded-xl focus:ring-2 focus:ring-green-500"
                   required
                 />
               </div>
+
+              {/* Confirm */}
               <div className="space-y-2">
                 <Label>Confirm Password</Label>
                 <Input
                   type="password"
                   name="confirm"
-                  autoComplete="new-password"
                   value={formData.confirm}
                   onChange={handleChange}
                   placeholder="••••••••"
-                  className="h-11 rounded-xl"
+                  className="h-11 rounded-xl focus:ring-2 focus:ring-green-500"
                   required
                 />
               </div>
 
+              {/* Error */}
               {error && (
-                <p className="text-sm text-red-500 bg-red-50 px-4 py-2 rounded-lg">{error}</p>
+                <div className="text-sm text-red-500 bg-red-50 border border-red-100 px-4 py-2 rounded-lg">
+                  {error}
+                </div>
               )}
 
+              {/* Submit */}
               <Button
                 type="submit"
                 disabled={loading}
-                className="w-full h-11 bg-green-700 hover:bg-green-800 rounded-xl font-semibold"
+                className="w-full h-11 bg-green-700 hover:bg-green-800 rounded-xl font-semibold shadow-md transition-all hover:scale-[1.02] active:scale-95"
               >
                 {loading ? (
                   <div className="flex items-center gap-2">
@@ -138,9 +155,10 @@ function Signup() {
                 )}
               </Button>
 
+              {/* Footer */}
               <p className="text-center text-sm text-gray-500">
                 Already have an account?{' '}
-                <Link to="/login" className="text-green-700 font-medium hover:underline">
+                <Link to="/login" className="text-green-700 font-semibold hover:underline">
                   Sign in
                 </Link>
               </p>

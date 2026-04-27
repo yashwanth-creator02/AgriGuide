@@ -6,7 +6,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import AlertBanner from '@/components/AlertBanner';
 import { fetchPestAlerts } from '@/services/pestService';
-import { AlertTriangle, Filter, Leaf, SearchX } from 'lucide-react';
+import { AlertTriangle, Filter, SearchX } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 const SEVERITY_OPTIONS = ['All', 'High', 'Medium', 'Low'];
@@ -41,8 +41,8 @@ function PestAlerts() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-emerald-50 via-white to-lime-50 px-4 py-8 md:px-6">
-        <div className="mx-auto max-w-4xl space-y-6">
+      <div className="min-h-[calc(100vh-5rem)] bg-gradient-to-b from-emerald-50 via-white to-lime-50 px-4 py-8 md:px-6">
+        <div className="mx-auto flex min-h-[calc(100vh-10rem)] max-w-4xl flex-col space-y-6">
           <div className="rounded-3xl border border-emerald-100 bg-white/80 p-6 shadow-sm backdrop-blur md:p-8">
             <Skeleton className="h-8 w-44" />
             <Skeleton className="mt-3 h-4 w-80 max-w-full" />
@@ -52,7 +52,7 @@ function PestAlerts() {
             </div>
           </div>
 
-          <div className="space-y-4">
+          <div className="flex-1 space-y-4">
             {[...Array(4)].map((_, i) => (
               <Skeleton key={i} className="h-36 w-full rounded-3xl" />
             ))}
@@ -64,8 +64,8 @@ function PestAlerts() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-emerald-50 via-white to-lime-50 px-4 py-8 md:px-6">
-        <div className="mx-auto flex min-h-[70vh] max-w-4xl items-center justify-center">
+      <div className="min-h-[calc(100vh-5rem)] bg-gradient-to-b from-emerald-50 via-white to-lime-50 px-4 py-8 md:px-6">
+        <div className="mx-auto flex min-h-[calc(100vh-10rem)] max-w-4xl items-center justify-center">
           <Card className="w-full rounded-3xl border-red-100 bg-white shadow-lg">
             <CardContent className="p-8 text-center">
               <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-red-50">
@@ -81,8 +81,8 @@ function PestAlerts() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-emerald-50 via-white to-lime-50 px-4 py-8 md:px-6">
-      <div className="mx-auto max-w-4xl">
+    <div className="min-h-[calc(100vh-5rem)] bg-gradient-to-b from-emerald-50 via-white to-lime-50 px-4 py-8 md:px-6">
+      <div className="mx-auto flex min-h-[calc(100vh-10rem)] max-w-6xl flex-col">
         <div className="mb-8 rounded-3xl border border-emerald-100 bg-white/80 p-6 shadow-sm backdrop-blur md:p-8">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
             <div>
@@ -162,32 +162,34 @@ function PestAlerts() {
           )}
         </div>
 
-        {filtered.length === 0 ? (
-          <Card className="rounded-3xl border-dashed border-gray-200 bg-white/80 shadow-sm">
-            <CardContent className="flex min-h-[300px] flex-col items-center justify-center p-8 text-center">
-              <div className="mb-4 rounded-full bg-emerald-50 p-4">
-                <SearchX className="h-8 w-8 text-emerald-700" />
-              </div>
-              <h3 className="text-lg font-semibold text-gray-900">No alerts found</h3>
-              <p className="mt-2 max-w-md text-sm leading-6 text-gray-600">
-                No pest alerts match the selected filters. Try changing severity or crop.
-              </p>
-            </CardContent>
-          </Card>
-        ) : (
-          <div className="space-y-4">
-            {filtered.map((alert) => (
-              <AlertBanner
-                key={alert.id}
-                pest_name={alert.pest_name}
-                affected_crop={alert.affected_crop}
-                region={alert.region}
-                severity={alert.severity}
-                description={alert.description}
-              />
-            ))}
-          </div>
-        )}
+        <div className="flex flex-1 flex-col">
+          {filtered.length === 0 ? (
+            <Card className="flex-1 rounded-3xl border-dashed border-gray-200 bg-white/80 shadow-sm">
+              <CardContent className="flex min-h-[320px] h-full flex-col items-center justify-center p-8 text-center">
+                <div className="mb-4 rounded-full bg-emerald-50 p-4">
+                  <SearchX className="h-8 w-8 text-emerald-700" />
+                </div>
+                <h3 className="text-lg font-semibold text-gray-900">No alerts found</h3>
+                <p className="mt-2 max-w-md text-sm leading-6 text-gray-600">
+                  No pest alerts match the selected filters. Try changing severity or crop.
+                </p>
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="flex flex-1 flex-col space-y-4">
+              {filtered.map((alert) => (
+                <AlertBanner
+                  key={alert.id}
+                  pest_name={alert.pest_name}
+                  affected_crop={alert.affected_crop}
+                  region={alert.region}
+                  severity={alert.severity}
+                  description={alert.description}
+                />
+              ))}
+            </div>
+          )}
+        </div>
 
         {alerts.length > 0 && (
           <p className="mt-8 text-center text-xs text-gray-400">
