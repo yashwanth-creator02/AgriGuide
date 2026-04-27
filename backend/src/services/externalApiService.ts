@@ -16,19 +16,27 @@ export const getWeatherFromOpenMeteo = async (lat: number, lng: number) => {
 }
 
 export const getCoordinatesFromName = async (location: string) => {
-    const response = await fetch(
-        `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(location)}&count=1`
-    )
-    const data = await response.json() as any
-    if (!data.results || data.results.length === 0) {
-        throw new Error('Location not found')
+    const searchTerms = [location, location.split(',')[0].trim()];
+
+    for (const term of searchTerms) {
+        const response = await fetch(
+            `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(term)}&count=1&language=en&format=json`
+        );
+
+        const data = await response.json() as any;
+
+        if (data.results && data.results.length > 0) {
+            return {
+                lat: data.results[0].latitude,
+                lng: data.results[0].longitude,
+                name: data.results[0].name,
+                country: data.results[0].country,
+            };
+        }
     }
-    return {
-        lat: data.results[0].latitude,
-        lng: data.results[0].longitude,
-        name: data.results[0].name,
-        country: data.results[0].country,
-    }
+
+    // If both attempts fail, throw a specific error
+    throw new Error('Location not found');
 }
 
 // Market Prices: data.gov.in Agmarknet API
