@@ -16,7 +16,13 @@ import pestRoutes from './routes/pestRoutes'
 const app = express()
 
 // Middleware
-app.use(cors())
+app.use(cors({
+    origin: [
+        'http://localhost:5173',
+        'https://agri-guide-9ctu1zcx6-yashwanth-creator02s-projects.vercel.app'
+    ],
+    credentials: true
+}));
 app.use(express.json())
 
 // Routes
