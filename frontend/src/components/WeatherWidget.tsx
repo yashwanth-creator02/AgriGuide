@@ -1,7 +1,7 @@
 // frontend/src/components/WeatherWidget.tsx
 
 import type { WeatherData } from '../types';
-import { CloudSun, Droplets, Wind, CloudRain } from 'lucide-react';
+import { CloudSun, Droplets, Wind, CloudRain, MapPin } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 
 interface WeatherWidgetProps {
@@ -19,7 +19,10 @@ function WeatherWidget({ weather }: WeatherWidgetProps) {
               <CloudSun className="h-5 w-5 text-emerald-600" />
               Current Weather
             </h2>
-            <p className="text-sm text-gray-500 mt-1">📍 {weather.location}</p>
+            <p className="text-sm text-gray-500 mt-1 flex items-center gap-1.5">
+              <MapPin className="h-3.5 w-3.5 text-slate-400" />
+              {weather.location}
+            </p>
           </div>
 
           {/* Main Temp */}

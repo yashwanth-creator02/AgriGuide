@@ -1,8 +1,8 @@
 // frontend/src/pages/Login.tsx
 
 import { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
-import { login } from '@/services/authService';
+import { useNavigate, useLocation, Link, Navigate } from 'react-router-dom';
+import { login, isLoggedIn } from '@/services/authService';
 import { Sprout, LogIn, Mail, Lock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -12,9 +12,15 @@ import { toast } from 'sonner';
 
 function Login() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+
+  // If already logged in, redirect away from login page
+  if (isLoggedIn()) {
+    return <Navigate to="/" replace />;
+  }
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -30,7 +36,10 @@ function Login() {
       localStorage.setItem('token', data.token);
       localStorage.setItem('user', JSON.stringify(data.user));
       toast.success(`Welcome back, ${data.user.name}!`);
-      navigate('/');
+
+      // Redirect back to intended page if one was saved by ProtectedRoute
+      const destination = (location.state as any)?.from?.pathname || '/';
+      navigate(destination, { replace: true });
     } catch (err: any) {
       setError(err.message);
       toast.error(err.message || 'Login failed. Please try again.');
@@ -100,80 +109,64 @@ function Login() {
                 </div>
                 <CardTitle className="text-2xl font-bold text-gray-900">Sign in</CardTitle>
                 <CardDescription className="text-gray-500">
-                  Enter your email and password to continue
+                  Enter your credentials to manage your farm
                 </CardDescription>
               </CardHeader>
 
-              <CardContent className="p-6 pt-0 sm:p-8 sm:pt-0">
-                <form onSubmit={handleSubmit} className="space-y-5">
-                  <div className="space-y-2">
-                    <Label htmlFor="email" className="text-sm font-medium text-gray-700">
-                      Email
-                    </Label>
-                    <div className="relative">
-                      <Mail className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-                      <Input
-                        id="email"
-                        type="email"
-                        name="email"
-                        value={formData.email}
-                        onChange={handleChange}
-                        placeholder="you@example.com"
-                        autoComplete="email"
-                        className="h-12 rounded-2xl border-gray-200 bg-white pl-10 shadow-sm outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100"
-                        required
-                      />
-                    </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="password" className="text-sm font-medium text-gray-700">
-                      Password
-                    </Label>
-                    <div className="relative">
-                      <Lock className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-                      <Input
-                        id="password"
-                        type="password"
-                        name="password"
-                        autoComplete="current-password"
-                        value={formData.password}
-                        onChange={handleChange}
-                        placeholder="••••••••"
-                        className="h-12 rounded-2xl border-gray-200 bg-white pl-10 shadow-sm outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100"
-                        required
-                      />
-                    </div>
-                  </div>
-
+              <CardContent>
+                <form onSubmit={handleSubmit} className="space-y-4">
                   {error && (
-                    <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
+                    <div className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
                       {error}
                     </div>
                   )}
 
+                  <div className="space-y-2">
+                    <Label htmlFor="email">Email Address</Label>
+                    <div className="relative">
+                      <Mail className="absolute left-3.5 top-3.5 h-4 w-4 text-gray-400" />
+                      <Input
+                        id="email"
+                        name="email"
+                        type="email"
+                        placeholder="farmer@example.com"
+                        value={formData.email}
+                        onChange={handleChange}
+                        className="h-11 rounded-2xl pl-10"
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="password">Password</Label>
+                    <div className="relative">
+                      <Lock className="absolute left-3.5 top-3.5 h-4 w-4 text-gray-400" />
+                      <Input
+                        id="password"
+                        name="password"
+                        type="password"
+                        placeholder="••••••••"
+                        value={formData.password}
+                        onChange={handleChange}
+                        className="h-11 rounded-2xl pl-10"
+                        required
+                      />
+                    </div>
+                  </div>
+
                   <Button
                     type="submit"
                     disabled={loading}
-                    className="h-12 w-full rounded-2xl bg-emerald-700 font-semibold text-white shadow-md transition hover:bg-emerald-800 hover:shadow-lg"
+                    className="h-12 w-full rounded-2xl bg-emerald-700 font-semibold text-white shadow-md shadow-emerald-200 transition hover:bg-emerald-800"
                   >
-                    {loading ? (
-                      <div className="flex items-center gap-2">
-                        <div className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
-                        Signing in...
-                      </div>
-                    ) : (
-                      <div className="flex items-center gap-2">
-                        <LogIn className="h-4 w-4" />
-                        Sign In
-                      </div>
-                    )}
+                    {loading ? 'Signing in...' : 'Sign In'}
                   </Button>
 
                   <p className="pt-2 text-center text-sm text-gray-500">
-                    Don&apos;t have an account?{' '}
+                    Don’t have an account?{' '}
                     <Link to="/signup" className="font-medium text-emerald-700 hover:underline">
-                      Sign up
+                      Create account
                     </Link>
                   </p>
                 </form>

@@ -1,4 +1,4 @@
-# AgriGuide 🌾
+# AgriSuggest (AgriGuide)
 
 A full-stack crop advisory system for Indian farmers. AgriGuide provides personalized crop recommendations based on soil data, real-time weather, live market prices, and pest alerts.
 
@@ -7,13 +7,11 @@ A full-stack crop advisory system for Indian farmers. AgriGuide provides persona
 ## Project Structure
 
 ```
-
 AgriSuggest/
-├── frontend/ # React + TypeScript + Vite
-├── backend/ # Node.js + Express + TypeScript
-├── database/ # PostgreSQL migrations and schema
-└── docs/ # API docs and system design
-
+├── frontend/    # React 19 + TypeScript + Vite + Tailwind CSS
+├── backend/     # Node.js + Express 5 + TypeScript + PostgreSQL (pg)
+├── database/    # PostgreSQL schema, migrations, and seeds
+└── docs/        # API docs, architecture specs, and system design
 ```
 
 ---
@@ -21,34 +19,32 @@ AgriSuggest/
 ## Tech Stack
 
 ### Frontend
-
-- React 18, TypeScript, Vite
-- Tailwind CSS, shadcn/ui
-- React Router, Leaflet.js
+- React 19, TypeScript, Vite
+- Tailwind CSS, Radix UI primitives (shadcn/ui pattern)
+- React Router v7, Leaflet.js / react-leaflet
+- Framer Motion, Lucide React
 
 ### Backend
-
-- Node.js, Express, TypeScript
-- PostgreSQL, bcrypt, JWT
+- Node.js, Express 5, TypeScript (ts-node, nodemon)
+- PostgreSQL (pg client pool), bcrypt, jsonwebtoken
 
 ### External APIs
-
-- Open-Meteo — Weather
-- Nominatim — Reverse geocoding
-- data.gov.in — Live mandi prices
+- Open-Meteo — Forecast & Geocoding
+- Nominatim — Reverse geocoding proxy
+- data.gov.in — Live mandi prices (Agmarknet)
 
 ---
 
 ## Features
 
-- 🌱 **Crop Recommendations** — based on soil type, pH, NPK, season
-- 🗺️ **Map Location Picker** — select farm location from interactive map
-- 🌤️ **Weather Widget** — real-time weather for farm location
-- 💰 **Live Market Prices** — real mandi prices from data.gov.in
-- 🐛 **Pest Alerts** — alerts with severity and crop filters
-- 📖 **Crop Guide** — detailed info and advisory for each crop
-- 📊 **History** — past soil submissions and recommendations
-- 🔐 **Authentication** — JWT based login and signup
+- **Crop Recommendations** — Suitability scoring based on soil type, pH, NPK levels, and season
+- **Map Location Picker** — Select farm location from an interactive Leaflet map with backend reverse-geocoding
+- **Weather Widget** — Real-time temperature, humidity, rainfall, and wind speed for farm locations
+- **Live Market Prices** — Real mandi prices fetched from data.gov.in
+- **Pest Alerts** — Regional pest outbreak warnings with severity rankings and management guidelines
+- **Crop Guide** — Public crop catalog with climate requirements, soil criteria, and fertilizer advice
+- **Farming History** — Historical soil submissions and generated recommendations
+- **Authentication** — Secure JWT-based registration, login, and protected personal farm profiles
 
 ---
 
@@ -57,11 +53,11 @@ AgriSuggest/
 ### Prerequisites
 
 - Node.js 18+
-- PostgreSQL
+- PostgreSQL 14+
 
 ---
 
-### 1. Clone the repo
+### 1. Clone the repository
 
 ```bash
 git clone https://github.com/yourusername/AgriSuggest.git
@@ -72,32 +68,41 @@ cd AgriSuggest
 
 ### 2. Set up environment variables
 
-Copy `.env.example` to `.env` and fill in your values:
+Create a `.env` file in the repository root:
 
-```env id="root-env"
+```env
 PORT=5000
 DB_HOST=localhost
 DB_PORT=5432
 DB_USER=postgres
 DB_PASSWORD=your_postgres_password
 DB_NAME=agriguide
-JWT_SECRET=your_jwt_secret
+JWT_SECRET=your_secure_jwt_secret
 MARKET_API_KEY=your_data_gov_in_api_key
 VITE_API_URL=http://localhost:5000/api
 ```
 
 ---
 
-### 3. Set up the database
+### 3. Initialize the database and seeds
+
+Run `psql` to create the database, apply the complete schema, and seed baseline crops and pest alerts:
 
 ```bash
-psql -U postgres
-CREATE DATABASE agriguide;
-\c agriguide
-\i database/migrations/001_create_farmers.sql
-\i database/migrations/002_create_soil_data.sql
-\i database/migrations/003_create_recommendations.sql
-\i database/migrations/004_create_users.sql
+psql -U postgres -c "CREATE DATABASE agriguide;"
+psql -U postgres -d agriguide -f database/schema.sql
+psql -U postgres -d agriguide -f database/seeds/seed_crops.sql
+psql -U postgres -d agriguide -f database/seeds/seed_pest_alerts.sql
+```
+
+Alternatively, run sequential migrations:
+```bash
+psql -U postgres -d agriguide -f database/migrations/001_create_farmers.sql
+psql -U postgres -d agriguide -f database/migrations/002_create_soil_data.sql
+psql -U postgres -d agriguide -f database/migrations/003_create_recommendations.sql
+psql -U postgres -d agriguide -f database/migrations/004_create_users.sql
+psql -U postgres -d agriguide -f database/seeds/seed_crops.sql
+psql -U postgres -d agriguide -f database/seeds/seed_pest_alerts.sql
 ```
 
 ---
@@ -110,6 +115,8 @@ npm install
 npm run dev
 ```
 
+Backend will run on `http://localhost:5000`.
+
 ---
 
 ### 5. Start the frontend
@@ -120,13 +127,21 @@ npm install
 npm run dev
 ```
 
+Frontend will run on `http://localhost:5173`.
+
 ---
 
-### 6. Open the app
+## Routing Architecture
 
-```
-http://localhost:5173
-```
+- `/` — Landing page with hero and quick actions
+- `/crop-info` (aliases: `/crops`, `/crop-guide`) — Public crop library and advisory guide
+- `/market-prices` (aliases: `/market`, `/prices`) — Public mandi commodity price monitor
+- `/pest-alerts` (aliases: `/pests`, `/alerts`) — Public pest alerts and mitigation steps
+- `/soil-input` (aliases: `/soil`, `/advisory`) — Soil analysis form (requires login)
+- `/results` — Crop recommendation results for current test
+- `/history` — Historical soil tests and recommendations log (requires login)
+- `/profile` — Farmer profile management (requires login)
+- `/login` / `/signup` — Authentication screens (redirects back to previous location upon login)
 
 ---
 
@@ -134,6 +149,7 @@ http://localhost:5173
 
 - [API Documentation](docs/API_docs.md)
 - [System Design](docs/system_design.md)
+- [File Inventory](docs/FILE_INVENTORY.md)
 - [Frontend README](frontend/README.md)
 - [Backend README](backend/README.md)
 
@@ -142,11 +158,15 @@ http://localhost:5173
 ## Database Schema
 
 ```
-farmers (id, name, email, password, phone, location, created_at)
-    │
-    ├── soil_data (id, farmer_id, soil_type, ph, nitrogen, phosphorus, potassium, location, season, created_at)
-    │       │
-    │       └── recommendations (id, farmer_id, soil_id, crop_name, suitability_score, reason, created_at)
+crops (id, name, season, suitable_soil, min_ph, max_ph, min_nitrogen, min_phosphorus, min_potassium, ...)
+  │
+farmers (id, name, email, password, phone, location, created_at, updated_at)
+  │
+  ├── soil_data (id, farmer_id, soil_type, ph, nitrogen, phosphorus, potassium, location, season, ...)
+  │     │
+  │     └── recommendations (id, farmer_id, soil_id, crop_name, suitability_score, reason, soil_snapshot, ...)
+  │
+pest_alerts (id, pest_name, affected_crop, crop_id, region, severity, description, ...)
 ```
 
 ---

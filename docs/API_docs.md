@@ -3,9 +3,7 @@
 ## Base URL
 
 ```
-
 http://localhost:5000/api
-
 ```
 
 ---
@@ -15,9 +13,7 @@ http://localhost:5000/api
 ### Signup
 
 ```
-
 POST /auth/signup
-
 ```
 
 **Body:**
@@ -26,11 +22,13 @@ POST /auth/signup
 {
   "name": "John Doe",
   "email": "john@example.com",
-  "password": "password123"
+  "password": "password123",
+  "phone": "9999999999",
+  "location": "Pune, Maharashtra"
 }
 ```
 
-**Response:**
+**Response (201 Created):**
 
 ```json
 {
@@ -38,7 +36,9 @@ POST /auth/signup
   "user": {
     "id": 1,
     "name": "John Doe",
-    "email": "john@example.com"
+    "email": "john@example.com",
+    "phone": "9999999999",
+    "location": "Pune, Maharashtra"
   }
 }
 ```
@@ -58,9 +58,9 @@ POST /auth/login
 }
 ```
 
-**Response:** Same as signup
+**Response (200 OK):** Same as signup.
 
-### Get Current User
+### Get Current User Profile
 
 ```
 GET /auth/me
@@ -68,17 +68,30 @@ GET /auth/me
 
 **Headers:** `Authorization: Bearer <token>`
 
-**Response:** Farmer object
+**Response (200 OK):**
+
+```json
+{
+  "id": 1,
+  "name": "John Doe",
+  "email": "john@example.com",
+  "phone": "9999999999",
+  "location": "Pune, Maharashtra",
+  "created_at": "2026-04-25T13:30:00Z"
+}
+```
 
 ---
 
 ## Farmers
 
-### Get all farmers
+### Get all farmers (Public directory)
 
 ```
 GET /farmers
 ```
+
+Returns farmer profiles without sensitive data (password hashes are never exposed).
 
 ### Get farmer by ID
 
@@ -86,11 +99,14 @@ GET /farmers
 GET /farmers/:id
 ```
 
-### Create farmer
+### Update farmer profile
 
 ```
-POST /farmers
+PUT /farmers/:id
+PUT /farmers/profile/:id
 ```
+
+**Headers:** `Authorization: Bearer <token>`
 
 **Body:**
 
@@ -102,23 +118,17 @@ POST /farmers
 }
 ```
 
-### Update farmer
-
-```
-PUT /farmers/:id
-```
-
-**Body:** Same as create
-
-### Delete farmer
+### Delete farmer account
 
 ```
 DELETE /farmers/:id
 ```
 
+**Headers:** `Authorization: Bearer <token>`
+
 ---
 
-## Soil Data
+## Soil Data & History
 
 ### Get all soil data
 
@@ -138,18 +148,20 @@ GET /soil/farmer/:farmer_id
 GET /soil/history/:farmer_id
 ```
 
-**Response:**
+**Headers:** `Authorization: Bearer <token>` (optional but recommended)
+
+**Response (200 OK):**
 
 ```json
 [
   {
     "id": 1,
     "farmer_id": 1,
-    "soil_type": "loamy",
-    "ph": 6.5,
-    "nitrogen": 100,
-    "phosphorus": 50,
-    "potassium": 35,
+    "soil_type": "Loamy",
+    "ph": "6.5",
+    "nitrogen": "100.00",
+    "phosphorus": "50.00",
+    "potassium": "35.00",
     "location": "Pune, Maharashtra",
     "season": "rabi",
     "created_at": "2026-04-25T13:33:05Z",
@@ -157,26 +169,28 @@ GET /soil/history/:farmer_id
       {
         "id": 1,
         "crop_name": "Wheat",
-        "suitability_score": 95,
-        "reason": "Best suited for rabi season with loamy soil."
+        "suitability_score": "95.00",
+        "reason": "Scored 95% based on rabi season requirements and Loamy soil compatibility."
       }
     ]
   }
 ]
 ```
 
-### Create soil data
+### Create soil test
 
 ```
 POST /soil
 ```
+
+**Headers:** `Authorization: Bearer <token>`
 
 **Body:**
 
 ```json
 {
   "farmer_id": 1,
-  "soil_type": "loamy",
+  "soil_type": "Loamy",
   "ph": 6.5,
   "nitrogen": 100,
   "phosphorus": 50,
@@ -186,17 +200,20 @@ POST /soil
 }
 ```
 
-### Delete soil data
+### Delete soil entry
 
 ```
 DELETE /soil/:id
+DELETE /soil/history/:id
 ```
+
+**Headers:** `Authorization: Bearer <token>`
 
 ---
 
 ## Recommendations
 
-### Get crop recommendations
+### Generate crop recommendations
 
 ```
 POST /recommendations
@@ -208,7 +225,7 @@ POST /recommendations
 {
   "farmer_id": 1,
   "soil_id": 1,
-  "soil_type": "loamy",
+  "soil_type": "Loamy",
   "ph": 6.5,
   "nitrogen": 100,
   "phosphorus": 50,
@@ -217,22 +234,25 @@ POST /recommendations
 }
 ```
 
-**Response:**
+**Response (200 OK):**
 
 ```json
 [
   {
+    "user_id": 1,
+    "soil_id": 1,
     "crop_name": "Wheat",
     "suitability_score": 95,
-    "reason": "Best suited for rabi season with loamy or clay loam soil."
+    "reason": "Scored 95% based on rabi season requirements and Loamy soil compatibility.",
+    "soil_snapshot": {
+      "ph": 6.5,
+      "n": 100,
+      "p": 50,
+      "k": 35,
+      "type": "Loamy"
+    }
   }
 ]
-```
-
-### Get recommendations by farmer
-
-```
-GET /recommendations/farmer/:farmer_id
 ```
 
 ---
@@ -253,81 +273,106 @@ GET /crops/:name
 
 ---
 
-## Weather
+## Weather & Geocoding
 
-### Get weather by location
+### Get weather by location name
 
 ```
 GET /weather?location=Pune
 ```
 
-**Response:**
+**Response (200 OK):**
 
 ```json
 {
   "location": "Pune, India",
-  "temperature": 39.8,
-  "humidity": 12,
+  "temperature": 32.4,
+  "humidity": 45,
   "rainfall": 0,
-  "wind_speed": 12
+  "wind_speed": 11.2
+}
+```
+
+### Reverse-geocode coordinates
+
+```
+GET /weather/reverse?lat=18.5204&lng=73.8567
+```
+
+**Response (200 OK):**
+
+```json
+{
+  "city": "Pune",
+  "state": "Maharashtra",
+  "formatted": "Pune, Maharashtra"
 }
 ```
 
 ---
 
-## Market Prices
+## Market Prices (data.gov.in)
 
 ### Get market prices
 
 ```
-GET /market
+GET /market?page=1&limit=20
+GET /market?commodity=Wheat&page=1&limit=20
 ```
 
-### Get market prices by commodity
-
-```
-GET /market?commodity=Wheat
-```
-
-**Response:**
+**Response (200 OK):**
 
 ```json
-[
-  {
-    "crop": "Wheat",
-    "market": "Ahirora APMC",
-    "district": "Mirzapur",
-    "state": "Uttar Pradesh",
-    "min_price": 2425,
-    "max_price": 2450,
-    "price": 2450,
-    "unit": "Quintal",
-    "updated": "21/04/2026"
-  }
-]
+{
+  "records": [
+    {
+      "crop": "Wheat",
+      "market": "Ahirora APMC",
+      "district": "Mirzapur",
+      "state": "Uttar Pradesh",
+      "min_price": 2425,
+      "max_price": 2450,
+      "price": 2450,
+      "unit": "Quintal",
+      "updated": "21/04/2026"
+    }
+  ],
+  "total": 120
+}
 ```
 
 ---
 
-## Error Responses
+## Pest Alerts
 
-All endpoints return errors in this format:
+### Get all alerts
+
+```
+GET /pests
+```
+
+### Get alerts by severity
+
+```
+GET /pests/severity/:severity
+```
+
+Severity values: `High`, `Medium`, `Low`.
+
+### Get alerts by crop ID
+
+```
+GET /pests/crop/:crop_id
+```
+
+---
+
+## Error Handling
+
+Standard error format:
 
 ```json
 {
   "message": "Error description here"
 }
-```
-
-| Status Code | Meaning               |
-| ----------- | --------------------- |
-| 200         | Success               |
-| 201         | Created               |
-| 400         | Bad Request           |
-| 401         | Unauthorized          |
-| 404         | Not Found             |
-| 500         | Internal Server Error |
-
-```
-
 ```

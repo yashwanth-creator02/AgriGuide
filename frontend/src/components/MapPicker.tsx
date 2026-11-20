@@ -36,10 +36,23 @@ function LocationMarker({ onSelect }: { onSelect: (lat: number, lng: number) => 
 
 function MapPicker({ onLocationSelect, onClose }: MapPickerProps) {
   const [loading, setLoading] = useState(false);
+  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
   const handleLocationSelect = async (lat: number, lng: number) => {
     setLoading(true);
     try {
+      // 1. Try our compliant backend reverse-geocoding proxy
+      const backendRes = await fetch(`${API_URL}/weather/reverse?lat=${lat}&lng=${lng}`);
+      if (backendRes.ok) {
+        const data = await backendRes.json();
+        if (data.formatted) {
+          onLocationSelect(data.formatted);
+          onClose();
+          return;
+        }
+      }
+
+      // 2. Direct fallback
       const response = await fetch(
         `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`
       );
@@ -50,7 +63,7 @@ function MapPicker({ onLocationSelect, onClose }: MapPickerProps) {
         data.address?.town ||
         data.address?.village ||
         data.address?.county ||
-        'Unknown';
+        'Selected Region';
 
       const state = data.address?.state || '';
       const locationName = state ? `${city}, ${state}` : city;
@@ -59,6 +72,8 @@ function MapPicker({ onLocationSelect, onClose }: MapPickerProps) {
       onClose();
     } catch (error) {
       console.error('Reverse geocoding error:', error);
+      onLocationSelect(`${lat.toFixed(4)}, ${lng.toFixed(4)}`);
+      onClose();
     } finally {
       setLoading(false);
     }

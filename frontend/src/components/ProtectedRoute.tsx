@@ -1,6 +1,6 @@
 // frontend/src/components/ProtectedRoute.tsx
 
-import { Navigate } from 'react-router-dom';
+import { Navigate, useLocation } from 'react-router-dom';
 import { isLoggedIn } from '@/services/authService';
 
 interface ProtectedRouteProps {
@@ -8,9 +8,13 @@ interface ProtectedRouteProps {
 }
 
 function ProtectedRoute({ children }: ProtectedRouteProps) {
+  const location = useLocation();
+
   if (!isLoggedIn()) {
-    return <Navigate to="/login" replace />;
+    // Preserve the intended destination so Login can redirect back after authentication
+    return <Navigate to="/login" state={{ from: location }} replace />;
   }
+
   return <>{children}</>;
 }
 

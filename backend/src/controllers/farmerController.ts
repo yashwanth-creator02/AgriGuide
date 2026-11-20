@@ -2,23 +2,27 @@
 
 import { Request, Response } from 'express'
 import pool from '../config/db'
-import { Farmer } from '../types'
 
-// Get all farmers
+// Get all farmers (public directory - safe fields only)
 export const getFarmers = async (req: Request, res: Response) => {
     try {
-        const result = await pool.query('SELECT * FROM farmers ORDER BY created_at DESC')
+        const result = await pool.query(
+            'SELECT id, name, email, phone, location, created_at FROM farmers ORDER BY created_at DESC'
+        )
         res.json(result.rows)
     } catch (error) {
         res.status(500).json({ message: 'Error fetching farmers' })
     }
 }
 
-// Get farmer by id
+// Get farmer by id (safe fields only)
 export const getFarmerById = async (req: Request, res: Response) => {
     try {
         const { id } = req.params
-        const result = await pool.query('SELECT * FROM farmers WHERE id = $1', [id])
+        const result = await pool.query(
+            'SELECT id, name, email, phone, location, created_at FROM farmers WHERE id = $1',
+            [id]
+        )
         if (result.rows.length === 0) {
             return res.status(404).json({ message: 'Farmer not found' })
         }
@@ -28,56 +32,34 @@ export const getFarmerById = async (req: Request, res: Response) => {
     }
 }
 
-// Create farmer
-export const createFarmer = async (req: Request, res: Response) => {
-    try {
-        const { name, phone, location } = req.body
-        const result = await pool.query(
-            'INSERT INTO farmers (name, phone, location) VALUES ($1, $2, $3) RETURNING *',
-            [name, phone, location]
-        )
-        res.status(201).json(result.rows[0])
-    } catch (error) {
-        res.status(500).json({ message: 'Error creating farmer' })
-    }
-}
-
-// Update farmer
-export const updateFarmer = async (req: Request, res: Response) => {
+// Get profile of farmer
+export const getProfile = async (req: Request, res: Response) => {
     try {
         const { id } = req.params
-        const { name, phone, location } = req.body
         const result = await pool.query(
-            'UPDATE farmers SET name = $1, phone = $2, location = $3 WHERE id = $4 RETURNING *',
-            [name, phone, location, id]
+            'SELECT id, name, email, phone, location, created_at FROM farmers WHERE id = $1',
+            [id]
         )
         if (result.rows.length === 0) {
             return res.status(404).json({ message: 'Farmer not found' })
         }
         res.json(result.rows[0])
     } catch (error) {
-        res.status(500).json({ message: 'Error updating farmer' })
+        res.status(500).json({ message: 'Error fetching profile' })
     }
 }
 
-// Delete farmer
-export const deleteFarmer = async (req: Request, res: Response) => {
-    try {
-        const { id } = req.params
-        const result = await pool.query('DELETE FROM farmers WHERE id = $1 RETURNING *', [id])
-        if (result.rows.length === 0) {
-            return res.status(404).json({ message: 'Farmer not found' })
-        }
-        res.json({ message: 'Farmer deleted successfully' })
-    } catch (error) {
-        res.status(500).json({ message: 'Error deleting farmer' })
-    }
-}
-
-// updates farmers(users) profiles.
+// Update profile
 export const updateProfile = async (req: Request, res: Response) => {
     try {
         const { id } = req.params
+        const authUser = (req as any).user
+
+        // If authenticated, enforce that the user can only update their own profile
+        if (authUser && Number(authUser.id) !== Number(id)) {
+            return res.status(403).json({ message: 'Unauthorized to update this profile' })
+        }
+
         const { name, phone, location } = req.body
 
         if (!name) {
@@ -98,41 +80,29 @@ export const updateProfile = async (req: Request, res: Response) => {
 
         res.json(result.rows[0])
     } catch (error) {
-        console.error('Update profile error:', error)
         res.status(500).json({ message: 'Error updating profile' })
     }
 }
 
-// gets profile details.
-export const getProfile = async (req: Request, res: Response) => {
+// Update farmer
+export const updateFarmer = updateProfile
+
+// Delete farmer
+export const deleteFarmer = async (req: Request, res: Response) => {
     try {
         const { id } = req.params
+        const authUser = (req as any).user
 
-        const farmer = await pool.query(
-            'SELECT id, name, email, phone, location, created_at FROM farmers WHERE id = $1',
-            [id]
-        )
-
-        if (farmer.rows.length === 0) {
-            return res.status(404).json({ message: 'Farmer not found' })
+        if (authUser && Number(authUser.id) !== Number(id)) {
+            return res.status(403).json({ message: 'Unauthorized to delete this account' })
         }
 
-        const soilCount = await pool.query(
-            'SELECT COUNT(*) FROM soil_data WHERE farmer_id = $1',
-            [id]
-        )
-
-        const recCount = await pool.query(
-            'SELECT COUNT(*) FROM recommendations WHERE farmer_id = $1',
-            [id]
-        )
-
-        res.json({
-            ...farmer.rows[0],
-            total_analyses: parseInt(soilCount.rows[0].count),
-            total_recommendations: parseInt(recCount.rows[0].count),
-        })
+        const result = await pool.query('DELETE FROM farmers WHERE id = $1 RETURNING id', [id])
+        if (result.rows.length === 0) {
+            return res.status(404).json({ message: 'Farmer not found' })
+        }
+        res.json({ message: 'Farmer deleted successfully' })
     } catch (error) {
-        res.status(500).json({ message: 'Error fetching profile' })
+        res.status(500).json({ message: 'Error deleting farmer' })
     }
 }

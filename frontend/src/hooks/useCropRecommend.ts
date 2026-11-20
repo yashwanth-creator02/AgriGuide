@@ -16,8 +16,9 @@ export const useCropRecommend = () => {
       setRecommendations(data)
       return data
     } catch (err: any) {
-      setError(err.message)
-      return []
+      const msg = err.message || 'Failed to generate recommendations'
+      setError(msg)
+      throw err
     } finally {
       setLoading(false)
     }
