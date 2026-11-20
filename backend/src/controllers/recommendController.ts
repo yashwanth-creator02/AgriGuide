@@ -10,7 +10,7 @@ export const getRecommendations = async (req: Request, res: Response) => {
     try {
         const { farmer_id, soil_id, soil_type, ph, nitrogen, phosphorus, potassium, season } = req.body
 
-        const soilData = { soil_type, ph, nitrogen, phosphorus, potassium, season }
+        const soilData = { soil_id, soil_type, ph, nitrogen, phosphorus, potassium, season }
 
         // Fetch crops from database
         const cropsFromDb = await getAllCrops()
@@ -22,20 +22,26 @@ export const getRecommendations = async (req: Request, res: Response) => {
             return res.status(404).json({ message: 'No suitable crops found for the given soil data' })
         }
 
-        // Save recommendations to database with soil_snapshot
-        for (const rec of scored) {
-            await pool.query(
-                `INSERT INTO recommendations 
-          (farmer_id, soil_id, crop_name, suitability_score, reason, soil_snapshot)
-         VALUES ($1, $2, $3, $4, $5, $6)`,
-                [farmer_id, soil_id, rec.crop_name, rec.suitability_score, rec.reason, rec.soil_snapshot]
-            )
+        // Save recommendations to database if farmer_id is provided
+        if (farmer_id) {
+            for (const rec of scored) {
+                try {
+                    await pool.query(
+                        `INSERT INTO recommendations 
+              (farmer_id, soil_id, crop_name, suitability_score, reason, soil_snapshot)
+             VALUES ($1, $2, $3, $4, $5, $6)`,
+                        [farmer_id, soil_id || null, rec.crop_name, rec.suitability_score, rec.reason, rec.soil_snapshot]
+                    )
+                } catch (insertErr) {
+                    console.error('Failed to save individual recommendation:', insertErr)
+                }
+            }
         }
 
         res.json(scored)
     } catch (error) {
         console.error('Recommendation error:', error)
-        res.status(500).json({ message: 'Error generating recommendations', error: String(error) })
+        res.status(500).json({ message: 'Error generating recommendations' })
     }
 }
 

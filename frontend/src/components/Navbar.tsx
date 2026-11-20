@@ -16,13 +16,6 @@ import {
   Leaf,
 } from 'lucide-react';
 
-// Shadcn UI Components
-import {
-  NavigationMenu,
-  NavigationMenuItem,
-  NavigationMenuLink,
-  NavigationMenuList,
-} from '@/components/ui/navigation-menu';
 import {
   Sheet,
   SheetContent,
@@ -42,7 +35,6 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 
-// Utilities & Services
 import { cn } from '@/lib/utils';
 import { getUser, isLoggedIn, logout } from '@/services/authService';
 
@@ -59,12 +51,13 @@ function Navbar() {
   const user = getUser();
   const loggedIn = isLoggedIn();
 
-  // State for the "floating" hover effect
   const [hoveredPath, setHoveredPath] = useState<string | null>(null);
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   const handleLogout = () => {
     logout();
     navigate('/');
+    setMobileOpen(false);
   };
 
   const isActive = (path: string) => location.pathname === path;
@@ -72,7 +65,7 @@ function Navbar() {
   return (
     <header className="sticky top-0 z-50 w-full border-b border-emerald-100/50 bg-white/70 backdrop-blur-md supports-[backdrop-filter]:bg-white/60">
       <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-        {/* Brand Section: Uses motion and Sprout icon */}
+        {/* Brand Section */}
         <Link to="/" className="group flex items-center gap-3 relative">
           <motion.div
             whileHover={{ rotate: 15, scale: 1.1 }}
@@ -91,52 +84,48 @@ function Navbar() {
           </div>
         </Link>
 
-        {/* Desktop Navigation: Uses NavigationMenu, motion, and hoveredPath */}
-        <NavigationMenu className="hidden md:block">
-          <NavigationMenuList className="flex items-center gap-1">
-            {links.map((link) => (
-              <NavigationMenuItem key={link.path} className="relative">
-                <Link
-                  to={link.path}
-                  onMouseEnter={() => setHoveredPath(link.path)}
-                  onMouseLeave={() => setHoveredPath(null)}
-                  className={cn(
-                    'relative z-10 px-4 py-2 text-sm font-semibold transition-colors duration-300',
-                    isActive(link.path) ? 'text-emerald-700' : 'text-slate-600 hover:text-slate-900'
-                  )}
-                >
-                  <NavigationMenuLink asChild>
-                    <span>{link.label}</span>
-                  </NavigationMenuLink>
+        {/* Desktop Navigation Links */}
+        <nav className="hidden md:flex items-center gap-1">
+          {links.map((link) => (
+            <div key={link.path} className="relative">
+              <Link
+                to={link.path}
+                onMouseEnter={() => setHoveredPath(link.path)}
+                onMouseLeave={() => setHoveredPath(null)}
+                className={cn(
+                  'relative z-10 px-4 py-2 text-sm font-semibold transition-colors duration-300 block',
+                  isActive(link.path) ? 'text-emerald-700' : 'text-slate-600 hover:text-slate-900'
+                )}
+              >
+                <span>{link.label}</span>
 
-                  {/* Active Tab Indicator */}
-                  {isActive(link.path) && (
+                {/* Active Tab Indicator */}
+                {isActive(link.path) && (
+                  <motion.div
+                    layoutId="activeTab"
+                    className="absolute inset-0 z-[-1] rounded-full bg-emerald-50"
+                    transition={{ type: 'spring', bounce: 0.2, duration: 0.6 }}
+                  />
+                )}
+
+                {/* Hover Tab Indicator */}
+                <AnimatePresence>
+                  {hoveredPath === link.path && !isActive(link.path) && (
                     <motion.div
-                      layoutId="activeTab"
-                      className="absolute inset-0 z-[-1] rounded-full bg-emerald-50"
-                      transition={{ type: 'spring', bounce: 0.2, duration: 0.6 }}
+                      layoutId="hoverTab"
+                      initial={{ opacity: 0, scale: 0.95 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.95 }}
+                      className="absolute inset-0 z-[-2] rounded-full bg-slate-100/50"
                     />
                   )}
+                </AnimatePresence>
+              </Link>
+            </div>
+          ))}
+        </nav>
 
-                  {/* Hover Tab Indicator (AnimatePresence used here) */}
-                  <AnimatePresence>
-                    {hoveredPath === link.path && !isActive(link.path) && (
-                      <motion.div
-                        layoutId="hoverTab"
-                        initial={{ opacity: 0, scale: 0.95 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        exit={{ opacity: 0, scale: 0.95 }}
-                        className="absolute inset-0 z-[-2] rounded-full bg-slate-100/50"
-                      />
-                    )}
-                  </AnimatePresence>
-                </Link>
-              </NavigationMenuItem>
-            ))}
-          </NavigationMenuList>
-        </NavigationMenu>
-
-        {/* Desktop Actions: Uses Bell, DropdownMenu, Button, and User icons */}
+        {/* Desktop Actions */}
         <div className="hidden items-center gap-4 md:flex">
           {loggedIn ? (
             <>
@@ -144,6 +133,7 @@ function Navbar() {
                 variant="ghost"
                 size="icon"
                 className="text-slate-400 hover:text-emerald-600 rounded-full transition-colors"
+                aria-label="Notifications"
               >
                 <Bell className="h-5 w-5" />
               </Button>
@@ -155,7 +145,7 @@ function Navbar() {
                     className="group h-12 gap-3 rounded-2xl border border-transparent bg-slate-50 px-3 hover:bg-white hover:border-emerald-100 transition-all"
                   >
                     <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-emerald-100 text-emerald-700 font-bold text-xs group-hover:bg-emerald-600 group-hover:text-white transition-colors">
-                      {user?.name?.[0].toUpperCase() || <User className="h-4 w-4" />}
+                      {user?.name?.[0]?.toUpperCase() || <User className="h-4 w-4" />}
                     </div>
                     <div className="flex flex-col items-start text-left">
                       <span className="text-xs font-bold text-slate-900 leading-none">
@@ -235,13 +225,14 @@ function Navbar() {
           )}
         </div>
 
-        {/* Mobile Menu Toggle: Uses Sheet and Menu icon */}
-        <Sheet>
+        {/* Mobile Menu Toggle */}
+        <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
           <SheetTrigger asChild>
             <Button
               variant="outline"
               size="icon"
               className="h-12 w-12 rounded-2xl border-slate-100 text-slate-600 md:hidden hover:bg-emerald-50 hover:text-emerald-700 transition-colors"
+              aria-label="Open menu"
             >
               <Menu className="h-6 w-6" />
             </Button>
@@ -251,7 +242,7 @@ function Navbar() {
             side="right"
             className="flex w-full sm:w-[400px] flex-col border-none bg-white p-0 overflow-y-auto"
           >
-            {/* Header with Sprout icon */}
+            {/* Header */}
             <div className="p-8 bg-emerald-900 text-white">
               <SheetHeader className="text-left">
                 <SheetTitle className="flex items-center gap-3 text-2xl font-bold text-white">
@@ -264,13 +255,14 @@ function Navbar() {
               </SheetHeader>
             </div>
 
-            {/* Mobile Nav Links: Uses Leaf icon */}
+            {/* Mobile Nav Links */}
             <nav className="flex-1 px-4 py-8">
               <div className="grid gap-2">
                 {links.map((link) => (
                   <Link
                     key={link.path}
                     to={link.path}
+                    onClick={() => setMobileOpen(false)}
                     className={cn(
                       'flex items-center gap-4 rounded-2xl px-6 py-4 text-lg font-bold transition-all',
                       isActive(link.path)
@@ -291,17 +283,19 @@ function Navbar() {
 
               <Separator className="my-8 bg-slate-100" />
 
-              {/* Mobile Auth/Profile: Uses User, History, LogOut icons */}
+              {/* Mobile Auth/Profile */}
               {loggedIn ? (
                 <div className="grid gap-2">
                   <Link
                     to="/profile"
+                    onClick={() => setMobileOpen(false)}
                     className="flex items-center gap-4 px-6 py-4 text-slate-600 font-bold hover:bg-slate-50 rounded-2xl transition-all"
                   >
                     <User className="h-5 w-5 text-slate-400" /> My Profile
                   </Link>
                   <Link
                     to="/history"
+                    onClick={() => setMobileOpen(false)}
                     className="flex items-center gap-4 px-6 py-4 text-slate-600 font-bold hover:bg-slate-50 rounded-2xl transition-all"
                   >
                     <History className="h-5 w-5 text-slate-400" /> Farming History
@@ -319,12 +313,14 @@ function Navbar() {
                   <Button
                     variant="outline"
                     className="h-14 rounded-2xl font-bold border-slate-200"
+                    onClick={() => setMobileOpen(false)}
                     asChild
                   >
                     <Link to="/login">Login</Link>
                   </Button>
                   <Button
                     className="h-14 rounded-2xl font-bold bg-emerald-600 hover:bg-emerald-700"
+                    onClick={() => setMobileOpen(false)}
                     asChild
                   >
                     <Link to="/signup">Join Now</Link>

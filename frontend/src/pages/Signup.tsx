@@ -1,9 +1,9 @@
 // frontend/src/pages/Signup.tsx
 
 import { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
-import { signup } from '@/services/authService';
-import { Sprout, UserPlus } from 'lucide-react';
+import { useNavigate, useLocation, Link, Navigate } from 'react-router-dom';
+import { signup, isLoggedIn } from '@/services/authService';
+import { Sprout } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -12,9 +12,14 @@ import { toast } from 'sonner';
 
 function Signup() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [formData, setFormData] = useState({ name: '', email: '', password: '', confirm: '' });
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+
+  if (isLoggedIn()) {
+    return <Navigate to="/" replace />;
+  }
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -40,7 +45,9 @@ function Signup() {
       localStorage.setItem('token', data.token);
       localStorage.setItem('user', JSON.stringify(data.user));
       toast.success(`Welcome to AgriGuide, ${data.user.name}!`);
-      navigate('/');
+
+      const destination = (location.state as any)?.from?.pathname || '/';
+      navigate(destination, { replace: true });
     } catch (err: any) {
       setError(err.message);
       toast.error(err.message || 'Signup failed. Please try again.');
@@ -74,6 +81,12 @@ function Signup() {
 
           <CardContent className="p-8">
             <form onSubmit={handleSubmit} className="space-y-5">
+              {error && (
+                <div className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+                  {error}
+                </div>
+              )}
+
               {/* Name */}
               <div className="space-y-2">
                 <Label>Full Name</Label>
@@ -110,13 +123,13 @@ function Signup() {
                   name="password"
                   value={formData.password}
                   onChange={handleChange}
-                  placeholder="••••••••"
+                  placeholder="Min. 6 characters"
                   className="h-11 rounded-xl focus:ring-2 focus:ring-green-500"
                   required
                 />
               </div>
 
-              {/* Confirm */}
+              {/* Confirm Password */}
               <div className="space-y-2">
                 <Label>Confirm Password</Label>
                 <Input
@@ -124,39 +137,23 @@ function Signup() {
                   name="confirm"
                   value={formData.confirm}
                   onChange={handleChange}
-                  placeholder="••••••••"
+                  placeholder="Repeat your password"
                   className="h-11 rounded-xl focus:ring-2 focus:ring-green-500"
                   required
                 />
               </div>
 
-              {/* Error */}
-              {error && (
-                <div className="text-sm text-red-500 bg-red-50 border border-red-100 px-4 py-2 rounded-lg">
-                  {error}
-                </div>
-              )}
-
               {/* Submit */}
               <Button
                 type="submit"
                 disabled={loading}
-                className="w-full h-11 bg-green-700 hover:bg-green-800 rounded-xl font-semibold shadow-md transition-all hover:scale-[1.02] active:scale-95"
+                className="w-full h-11 bg-green-700 hover:bg-green-800 text-white font-semibold rounded-xl shadow-lg shadow-green-200 transition-all hover:scale-[1.02] active:scale-[0.98]"
               >
-                {loading ? (
-                  <div className="flex items-center gap-2">
-                    <div className="h-4 w-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                    Creating account...
-                  </div>
-                ) : (
-                  <div className="flex items-center gap-2">
-                    <UserPlus className="h-4 w-4" /> Create Account
-                  </div>
-                )}
+                {loading ? 'Creating account...' : 'Create Account'}
               </Button>
 
-              {/* Footer */}
-              <p className="text-center text-sm text-gray-500">
+              {/* Login link */}
+              <p className="text-center text-sm text-gray-500 pt-2">
                 Already have an account?{' '}
                 <Link to="/login" className="text-green-700 font-semibold hover:underline">
                   Sign in

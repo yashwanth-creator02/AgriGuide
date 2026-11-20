@@ -1,0 +1,133 @@
+-- Seed baseline crops data with matching IDs for pest alert references
+INSERT INTO crops (id, name, season, suitable_soil, min_ph, max_ph, min_nitrogen, min_phosphorus, min_potassium, about, climate, diseases, watering, fertilizer, harvest)
+VALUES
+(
+  1,
+  'Wheat',
+  'rabi',
+  ARRAY['Alluvial', 'Loamy', 'Clay'],
+  6.0, 7.5,
+  80.0, 40.0, 40.0,
+  'Major cereal grain cultivated in cool temperate regions and during the winter season across North and Central India.',
+  'Cool dry climate during vegetative phase, warm sunny weather during ripening.',
+  'Rust (Yellow/Brown/Black), Loose Smut, Powdery Mildew, Karnal Bunt.',
+  '4-6 irrigations at critical growth stages: Crown Root Initiation (CRI), tillering, jointing, flowering, and grain filling.',
+  'NPK ratio of 120:60:40 kg/ha. Apply half nitrogen and full P&K at sowing, rest N at first irrigation.',
+  'Harvest when grains turn hard and straw turns golden yellow, typically 110-130 days after sowing.'
+),
+(
+  2,
+  'Rice',
+  'kharif',
+  ARRAY['Clayey', 'Alluvial', 'Loamy'],
+  5.5, 7.0,
+  90.0, 50.0, 40.0,
+  'Primary staple food crop requiring high moisture and standing water during early growth stages.',
+  'Warm humid climate with high rainfall (100-150 cm) and average temperature of 22-32 C.',
+  'Blast, Bacterial Leaf Blight, Sheath Blight, Brown Plant Hopper.',
+  'Requires shallow standing water (2-5 cm) from transplanting until 10 days before harvest.',
+  'NPK ratio of 100:50:50 kg/ha with Zinc Sulfate application in deficient soils.',
+  'Harvest when 80% of panicles turn golden brown and grain moisture drops below 20%.'
+),
+(
+  3,
+  'Maize',
+  'kharif',
+  ARRAY['Alluvial', 'Loamy', 'Sandy Loam'],
+  5.8, 7.5,
+  70.0, 40.0, 30.0,
+  'Versatile cereal crop used for human consumption, livestock feed, and industrial starch.',
+  'Warm weather with well-distributed rainfall (50-75 cm); sensitive to frost and waterlogging.',
+  'Fall Armyworm, Downy Mildew, Turcicum Leaf Blight, Stalk Rot.',
+  'Requires moderate moisture; critical watering at tasseling and silking stages.',
+  'NPK ratio of 120:60:40 kg/ha applied in split doses.',
+  'Harvest when outer husks dry out and kernels show a black layer at base (90-110 days).'
+),
+(
+  4,
+  'Groundnut',
+  'kharif',
+  ARRAY['Sandy Loam', 'Loamy', 'Red'],
+  6.0, 7.5,
+  20.0, 40.0, 40.0,
+  'Valuable oilseed and legume crop that fixes atmospheric nitrogen, improving soil fertility.',
+  'Warm sunny climate with 50-70 cm rainfall during vegetative growth.',
+  'Tikka leaf spot, Rust, Collar rot, Aphids.',
+  'Critical irrigation at flowering, pegging, and pod development stages.',
+  'NPK 20:40:40 kg/ha along with gypsum application at flowering for pod filling.',
+  'Harvest when inner pod shells turn dark brown and leaves turn yellow (105-125 days).'
+),
+(
+  5,
+  'Cotton',
+  'kharif',
+  ARRAY['Black', 'Alluvial', 'Deep Loamy'],
+  6.0, 8.0,
+  80.0, 40.0, 40.0,
+  'Major commercial fibre crop thriving in black cotton soils with good moisture retention.',
+  'Long frost-free period, abundant sunshine, and warm days (21-30 C).',
+  'Bollworm complex, Whitefly, Bacterial Blight, Fusarium Wilt.',
+  'Irrigate at square formation, flowering, and boll development stages; avoid waterlogging.',
+  'NPK 120:60:60 kg/ha tailored to soil testing and hybrid requirements.',
+  'Pick mature open bolls in dry sunny weather, usually in multiple pickings.'
+),
+(
+  6,
+  'Sugarcane',
+  'kharif',
+  ARRAY['Loamy', 'Alluvial', 'Clayey'],
+  6.5, 7.8,
+  120.0, 60.0, 60.0,
+  'High-yield perennial grass cultivated for sugar, jaggery, ethanol, and bio-energy.',
+  'Tropical and sub-tropical warm humid climate with ample sunlight.',
+  'Red Rot, Smut, Early Shoot Borer, Top Borer.',
+  'Requires regular irrigation every 10-15 days during summer; total 150-200 cm water.',
+  'NPK 250:100:120 kg/ha applied in split doses through the tillering period.',
+  'Harvest when stalks mature and brix reading reaches 18-20% (10-14 months).'
+),
+(
+  7,
+  'Mustard',
+  'rabi',
+  ARRAY['Loamy', 'Sandy Loam', 'Alluvial'],
+  6.0, 7.5,
+  60.0, 30.0, 30.0,
+  'Major rabi oilseed crop cultivated for cooking oil and meal in temperate and subtropical tracts.',
+  'Cool climate with low humidity; clear skies during flowering and pod formation.',
+  'Alternaria Blight, White Rust, Mustard Aphid, Downy Mildew.',
+  'Usually requires 2-3 irrigations: first at pre-flowering and second at pod development.',
+  'NPK 80:40:40 kg/ha plus Sulfur application (20-30 kg/ha) to enhance oil content.',
+  'Harvest when pods turn golden brown and seeds rattle inside pods (100-120 days).'
+),
+(
+  8,
+  'Chickpea',
+  'rabi',
+  ARRAY['Sandy Loam', 'Loamy', 'Black'],
+  6.0, 7.8,
+  20.0, 40.0, 20.0,
+  'Major cool-season pulse crop rich in protein, fixing atmospheric nitrogen for subsequent crops.',
+  'Mild cold climate with low humidity and moderate winter precipitation.',
+  'Ascochyta Blight, Fusarium Wilt, Pod Borer, Dry Root Rot.',
+  'Relatively drought-hardy; 1-2 light irrigations at pre-flowering and pod development.',
+  'NPK 20:50:20 kg/ha with Rhizobium seed inoculation for optimal nitrogen fixation.',
+  'Harvest when leaves dry and shed, and pods turn yellowish brown (100-115 days).'
+)
+ON CONFLICT (id) DO UPDATE SET
+  name = EXCLUDED.name,
+  season = EXCLUDED.season,
+  suitable_soil = EXCLUDED.suitable_soil,
+  min_ph = EXCLUDED.min_ph,
+  max_ph = EXCLUDED.max_ph,
+  min_nitrogen = EXCLUDED.min_nitrogen,
+  min_phosphorus = EXCLUDED.min_phosphorus,
+  min_potassium = EXCLUDED.min_potassium,
+  about = EXCLUDED.about,
+  climate = EXCLUDED.climate,
+  diseases = EXCLUDED.diseases,
+  watering = EXCLUDED.watering,
+  fertilizer = EXCLUDED.fertilizer,
+  harvest = EXCLUDED.harvest;
+
+-- Update the primary key sequence to resume after id 8
+SELECT setval('crops_id_seq', (SELECT MAX(id) FROM crops));

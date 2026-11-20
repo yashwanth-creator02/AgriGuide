@@ -32,6 +32,10 @@ function History() {
 
   useEffect(() => {
     const farmer_id = getFarmerId();
+    if (!farmer_id) {
+      setLoading(false);
+      return;
+    }
     fetchHistory(farmer_id)
       .then(setHistory)
       .catch((err) => toast.error(err.message))

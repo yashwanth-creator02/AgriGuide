@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { fetchMarketPrices } from '../services/marketService';
 import { Skeleton } from '@/components/ui/skeleton';
-import { ChevronLeft, ChevronRight, Search, Sprout, TrendingUp } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Search, Sprout, TrendingUp, AlertTriangle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -84,7 +84,7 @@ function MarketPrices() {
         <div className="mx-auto flex min-h-[70vh] max-w-4xl items-center justify-center">
           <Card className="w-full rounded-3xl border-red-100 bg-white shadow-lg">
             <CardContent className="p-8 text-center">
-              <div className="mb-3 text-4xl">⚠️</div>
+              <AlertTriangle className="h-10 w-10 text-amber-500 mx-auto mb-3" />
               <h2 className="text-xl font-semibold text-gray-900">Unable to load market prices</h2>
               <p className="mt-2 text-sm text-gray-600">{error}</p>
             </CardContent>

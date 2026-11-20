@@ -29,29 +29,46 @@ export const getSoilDataByFarmer = async (req: Request, res: Response) => {
 
 // Create soil data
 export const createSoilData = async (req: Request, res: Response) => {
-    console.log('Soil data received:', req.body)
     try {
+        const authUser = (req as any).user
         const { farmer_id, soil_type, ph, nitrogen, phosphorus, potassium, location, season } = req.body
+        const resolvedFarmerId = authUser?.id || farmer_id
+
+        if (!resolvedFarmerId) {
+            return res.status(400).json({ message: 'Farmer ID is required' })
+        }
+
         const result = await pool.query(
             `INSERT INTO soil_data 
         (farmer_id, soil_type, ph, nitrogen, phosphorus, potassium, location, season) 
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8) 
        RETURNING *`,
-            [farmer_id, soil_type, ph, nitrogen, phosphorus, potassium, location, season]
+            [resolvedFarmerId, soil_type, ph, nitrogen, phosphorus, potassium, location, season]
         )
         res.status(201).json(result.rows[0])
     } catch (error) {
+        console.error('Save soil data error:', error)
         res.status(500).json({ message: 'Error saving soil data' })
     }
 }
 
-// Delete soil data
+// Delete soil data (with farmer ownership check if authenticated)
 export const deleteSoilData = async (req: Request, res: Response) => {
     try {
         const { id } = req.params
-        const result = await pool.query('DELETE FROM soil_data WHERE id = $1 RETURNING *', [id])
+        const authUser = (req as any).user
+
+        let query = 'DELETE FROM soil_data WHERE id = $1'
+        const params: any[] = [id]
+
+        if (authUser) {
+            query += ' AND farmer_id = $2'
+            params.push(authUser.id)
+        }
+
+        const result = await pool.query(query + ' RETURNING id', params)
         if (result.rows.length === 0) {
-            return res.status(404).json({ message: 'Soil data not found' })
+            return res.status(404).json({ message: 'Soil entry not found or unauthorized' })
         }
         res.json({ message: 'Soil data deleted successfully' })
     } catch (error) {
@@ -59,7 +76,7 @@ export const deleteSoilData = async (req: Request, res: Response) => {
     }
 }
 
-// Get soil data with recommendations by farmer
+// Get soil data with recommendations by farmer (O(1) query complexity instead of N+1)
 export const getSoilWithRecommendations = async (req: Request, res: Response) => {
     try {
         const { farmer_id } = req.params
@@ -69,18 +86,29 @@ export const getSoilWithRecommendations = async (req: Request, res: Response) =>
             [farmer_id]
         )
 
-        const history = await Promise.all(
-            soilResult.rows.map(async (soil) => {
-                const recResult = await pool.query(
-                    'SELECT * FROM recommendations WHERE soil_id = $1 ORDER BY suitability_score DESC',
-                    [soil.id]
-                )
-                return {
-                    ...soil,
-                    recommendations: recResult.rows,
-                }
-            })
+        if (soilResult.rows.length === 0) {
+            return res.json([])
+        }
+
+        const soilIds = soilResult.rows.map((s) => s.id)
+        const recResult = await pool.query(
+            'SELECT * FROM recommendations WHERE soil_id = ANY($1) ORDER BY suitability_score DESC',
+            [soilIds]
         )
+
+        const recsBySoilId = new Map<number, any[]>()
+        for (const rec of recResult.rows) {
+            const sid = rec.soil_id
+            if (!recsBySoilId.has(sid)) {
+                recsBySoilId.set(sid, [])
+            }
+            recsBySoilId.get(sid)!.push(rec)
+        }
+
+        const history = soilResult.rows.map((soil) => ({
+            ...soil,
+            recommendations: recsBySoilId.get(soil.id) || [],
+        }))
 
         res.json(history)
     } catch (error) {
@@ -89,26 +117,5 @@ export const getSoilWithRecommendations = async (req: Request, res: Response) =>
     }
 }
 
-export const deleteSoilEntry = async (req: Request, res: Response) => {
-    try {
-        const { id } = req.params
-
-        // Delete recommendations first (cascade should handle this but let's be explicit)
-        await pool.query('DELETE FROM recommendations WHERE soil_id = $1', [id])
-
-        // Delete soil entry
-        const result = await pool.query(
-            'DELETE FROM soil_data WHERE id = $1 RETURNING *',
-            [id]
-        )
-
-        if (result.rows.length === 0) {
-            return res.status(404).json({ message: 'Soil entry not found' })
-        }
-
-        res.json({ message: 'Entry deleted successfully' })
-    } catch (error) {
-        console.error('Delete soil error:', error)
-        res.status(500).json({ message: 'Error deleting entry' })
-    }
-}
+// Backward-compatible alias
+export const deleteSoilEntry = deleteSoilData

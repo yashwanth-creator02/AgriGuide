@@ -6,6 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
+import { AlertTriangle, Sprout } from 'lucide-react';
 
 type Crop = {
   name: string;
@@ -64,7 +65,7 @@ function CropInfo() {
         <div className="mx-auto flex min-h-[60vh] max-w-2xl items-center justify-center">
           <Card className="w-full rounded-3xl border-rose-100 shadow-lg">
             <CardContent className="p-8 text-center">
-              <div className="mb-3 text-4xl">⚠️</div>
+              <AlertTriangle className="h-10 w-10 text-rose-500 mx-auto mb-3" />
               <h2 className="text-xl font-semibold text-gray-900">Unable to load crop data</h2>
               <p className="mt-2 text-sm text-gray-600">{error}</p>
             </CardContent>
@@ -154,30 +155,30 @@ function CropInfo() {
                   value="info"
                   className="rounded-xl py-3 text-sm font-medium data-[state=active]:bg-emerald-600 data-[state=active]:text-white"
                 >
-                  📖 Crop Info
+                  Crop Info
                 </TabsTrigger>
                 <TabsTrigger
                   value="advisory"
                   className="rounded-xl py-3 text-sm font-medium data-[state=active]:bg-emerald-600 data-[state=active]:text-white"
                 >
-                  🌱 Advisory
+                  Advisory
                 </TabsTrigger>
               </TabsList>
 
               <TabsContent value="info" className="mt-6 space-y-4">
                 <div className="grid gap-4 md:grid-cols-2">
-                  <InfoCard title="🌍 Best Soil Type" value={crop.suitable_soil.join(', ')} />
-                  <InfoCard title="🌡️ pH Range" value={`${crop.min_ph} - ${crop.max_ph}`} />
-                  <InfoCard title="🌤️ Climate Requirements" value={crop.climate} fullWidth />
-                  <InfoCard title="🦠 Common Diseases" value={crop.diseases} fullWidth />
+                  <InfoCard title="Best Soil Type" value={crop.suitable_soil.join(', ')} />
+                  <InfoCard title="pH Range" value={`${crop.min_ph} - ${crop.max_ph}`} />
+                  <InfoCard title="Climate Requirements" value={crop.climate} fullWidth />
+                  <InfoCard title="Common Diseases" value={crop.diseases} fullWidth />
                 </div>
               </TabsContent>
 
               <TabsContent value="advisory" className="mt-6 space-y-4">
                 <div className="grid gap-4 md:grid-cols-3">
-                  <InfoCard title="💧 Watering Schedule" value={crop.watering} />
-                  <InfoCard title="🌱 Fertilizer Tips" value={crop.fertilizer} />
-                  <InfoCard title="🌾 Harvest Time" value={crop.harvest} />
+                  <InfoCard title="Watering Schedule" value={crop.watering} />
+                  <InfoCard title="Fertilizer Tips" value={crop.fertilizer} />
+                  <InfoCard title="Harvest Time" value={crop.harvest} />
                 </div>
               </TabsContent>
             </Tabs>
@@ -185,7 +186,7 @@ function CropInfo() {
         ) : (
           <Card className="rounded-3xl border-dashed border-gray-200 bg-white/70 shadow-sm">
             <CardContent className="flex min-h-[240px] flex-col items-center justify-center p-8 text-center">
-              <div className="mb-3 text-5xl">🌾</div>
+              <Sprout className="h-12 w-12 text-emerald-600/40 mb-3" />
               <h3 className="text-lg font-semibold text-gray-900">No crop selected</h3>
               <p className="mt-2 max-w-md text-sm text-gray-600">
                 Choose a crop from the dropdown above to view its farming details and advisory

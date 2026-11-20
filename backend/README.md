@@ -7,7 +7,7 @@ Node.js + Express + TypeScript backend for the AgriGuide crop advisory system.
 ## Tech Stack
 
 - **Node.js** — Runtime
-- **Express** — Web framework
+- **Express 5** — Web framework
 - **TypeScript** — Type safety
 - **PostgreSQL** — Database
 - **bcrypt** — Password hashing
@@ -22,7 +22,7 @@ Node.js + Express + TypeScript backend for the AgriGuide crop advisory system.
 
 - Node.js 18+
 - npm
-- PostgreSQL
+- PostgreSQL 14+
 
 ### Installation
 
@@ -37,7 +37,7 @@ npm install
 
 Create a `.env` file in the root of the project:
 
-```env id="env-backend"
+```env
 PORT=5000
 DB_HOST=localhost
 DB_PORT=5432
@@ -52,26 +52,20 @@ MARKET_API_KEY=your_data_gov_in_api_key
 
 ## Database Setup
 
-Make sure PostgreSQL is running and create the database:
+Make sure PostgreSQL is running, create the database, and run schema and seed scripts:
 
-```sql id="db-create"
-CREATE DATABASE agriguide;
-```
-
-Then run the migrations in order:
-
-```sql id="db-migrate"
-\i 'path/to/database/migrations/001_create_farmers.sql'
-\i 'path/to/database/migrations/002_create_soil_data.sql'
-\i 'path/to/database/migrations/003_create_recommendations.sql'
-\i 'path/to/database/migrations/004_create_users.sql'
+```bash
+psql -U postgres -c "CREATE DATABASE agriguide;"
+psql -U postgres -d agriguide -f ../database/schema.sql
+psql -U postgres -d agriguide -f ../database/seeds/seed_crops.sql
+psql -U postgres -d agriguide -f ../database/seeds/seed_pest_alerts.sql
 ```
 
 ---
 
 ## Running in Development
 
-```bash id="dev-run"
+```bash
 npm run dev
 ```
 
@@ -81,7 +75,7 @@ Server runs at `http://localhost:5000`
 
 ## Building for Production
 
-```bash id="prod-build"
+```bash
 npm run build
 npm start
 ```
@@ -90,7 +84,7 @@ npm start
 
 ## Folder Structure
 
-```bash id="folder-structure"
+```
 src/
 ├── config/             # DB connection and env variables
 │   ├── db.ts
@@ -99,6 +93,8 @@ src/
 │   ├── authController.ts
 │   ├── cropController.ts
 │   ├── farmerController.ts
+│   ├── marketController.ts
+│   ├── pestController.ts
 │   ├── recommendController.ts
 │   ├── soilController.ts
 │   └── weatherController.ts
@@ -111,6 +107,7 @@ src/
 │   ├── cropRoutes.ts
 │   ├── farmerRoutes.ts
 │   ├── marketRoutes.ts
+│   ├── pestRoutes.ts
 │   ├── recommendRoutes.ts
 │   ├── soilRoutes.ts
 │   └── weatherRoutes.ts
@@ -128,28 +125,35 @@ server.ts               # Server entry point
 
 ## API Endpoints
 
-| Method | Endpoint              | Auth | Description         |
-| ------ | --------------------- | ---- | ------------------- |
-| POST   | /api/auth/signup      | No   | Register farmer     |
-| POST   | /api/auth/login       | No   | Login farmer        |
-| GET    | /api/auth/me          | Yes  | Get current farmer  |
-| GET    | /api/farmers          | No   | Get all farmers     |
-| POST   | /api/farmers          | No   | Create farmer       |
-| GET    | /api/soil             | No   | Get all soil data   |
-| POST   | /api/soil             | No   | Save soil data      |
-| GET    | /api/soil/history/:id | No   | Get history         |
-| POST   | /api/recommendations  | No   | Get recommendations |
-| GET    | /api/crops            | No   | Get all crops       |
-| GET    | /api/weather          | No   | Get weather         |
-| GET    | /api/market           | No   | Get market prices   |
+| Method | Endpoint                    | Auth | Description                                      |
+| ------ | --------------------------- | ---- | ------------------------------------------------ |
+| POST   | /api/auth/signup            | No   | Register new farmer account                      |
+| POST   | /api/auth/login             | No   | Authenticate and receive JWT token               |
+| GET    | /api/auth/me                | Yes  | Get authenticated farmer profile                 |
+| GET    | /api/farmers                | No   | Public farmer directory (safe fields only)       |
+| GET    | /api/farmers/:id            | No   | Get farmer public details                        |
+| PUT    | /api/farmers/:id            | Yes  | Update farmer details (authenticated user only)  |
+| DELETE | /api/farmers/:id            | Yes  | Delete farmer account (authenticated user only)  |
+| GET    | /api/soil                   | No   | Get all soil records                             |
+| POST   | /api/soil                   | Yes  | Save soil analysis data                          |
+| GET    | /api/soil/history/:farmer_id| No   | Get soil test history with recommendations       |
+| DELETE | /api/soil/:id               | Yes  | Delete soil entry                                |
+| POST   | /api/recommendations        | No   | Score crops against soil test parameters         |
+| GET    | /api/crops                  | No   | Get all crop guidelines                          |
+| GET    | /api/crops/:name            | No   | Get specific crop details                        |
+| GET    | /api/weather                | No   | Current weather by location                      |
+| GET    | /api/weather/reverse        | No   | Reverse geocode coordinates to location name     |
+| GET    | /api/market                 | No   | Live mandi prices from data.gov.in               |
+| GET    | /api/pests                  | No   | Pest alerts with severity rankings               |
+| GET    | /api/pests/severity/:sev    | No   | Filter pest alerts by severity level             |
+| GET    | /api/pests/crop/:crop_id    | No   | Filter pest alerts by crop                       |
 
 ---
 
 ## External APIs
 
-| API                  | Purpose             |
-| -------------------- | ------------------- |
-| Open-Meteo           | Weather forecast    |
-| Open-Meteo Geocoding | City to coordinates |
-| Nominatim            | Reverse geocoding   |
-| data.gov.in          | Live mandi prices   |
+| API           | Purpose                                              |
+| ------------- | ---------------------------------------------------- |
+| Open-Meteo    | Real-time weather and coordinate geocoding           |
+| Nominatim     | Reverse geocoding proxy with custom User-Agent       |
+| data.gov.in   | Live mandi commodity prices (Agmarknet)              |

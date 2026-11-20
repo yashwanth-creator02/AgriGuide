@@ -40,6 +40,10 @@ function Profile() {
   });
 
   useEffect(() => {
+    if (!farmerId) {
+      setLoading(false);
+      return;
+    }
     fetchProfile(farmerId)
       .then((data) => {
         setProfile(data);
@@ -60,6 +64,10 @@ function Profile() {
   const handleSave = async () => {
     if (!formData.name.trim()) {
       toast.error('Name is required');
+      return;
+    }
+    if (!farmerId) {
+      toast.error('You must be logged in to update profile');
       return;
     }
 

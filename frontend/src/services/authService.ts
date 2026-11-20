@@ -1,6 +1,6 @@
 // frontend/src/services/authService.ts
 
-const API_URL = import.meta.env.VITE_API_URL
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api'
 
 export const signup = async (name: string, email: string, password: string) => {
   const response = await fetch(`${API_URL}/auth/signup`, {
@@ -10,7 +10,7 @@ export const signup = async (name: string, email: string, password: string) => {
   })
   if (!response.ok) {
     const err = await response.json()
-    throw new Error(err.message)
+    throw new Error(err.message || 'Signup failed')
   }
   return response.json()
 }
@@ -23,7 +23,7 @@ export const login = async (email: string, password: string) => {
   })
   if (!response.ok) {
     const err = await response.json()
-    throw new Error(err.message)
+    throw new Error(err.message || 'Login failed')
   }
   return response.json()
 }
@@ -31,19 +31,27 @@ export const login = async (email: string, password: string) => {
 export const logout = () => {
   localStorage.removeItem('token')
   localStorage.removeItem('user')
-  localStorage.removeItem('farmer_id')
 }
 
 export const getToken = () => localStorage.getItem('token')
 
 export const getUser = () => {
-  const user = localStorage.getItem('user')
-  return user ? JSON.parse(user) : null
+  try {
+    const user = localStorage.getItem('user')
+    return user ? JSON.parse(user) : null
+  } catch {
+    return null
+  }
 }
 
-export const getFarmerId = () => {
+export const getFarmerId = (): number | null => {
   const user = getUser()
-  return user ? user.id : 1
+  return user?.id ?? null
 }
 
 export const isLoggedIn = () => !!getToken()
+
+export const getAuthHeaders = (): Record<string, string> => {
+  const token = getToken()
+  return token ? { Authorization: `Bearer ${token}` } : {}
+}
