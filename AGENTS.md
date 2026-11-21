@@ -14,7 +14,11 @@ Full-stack crop advisory web application for Indian farmers providing personaliz
 
 | Task | Command |
 | --- | --- |
-| Install (all) | `npm --prefix frontend install && npm --prefix backend install` |
+| Install root tooling | `npm install` |
+| Dev (both) | `npm run dev` |
+| Dev backend only | `npm run dev:backend` |
+| Dev frontend only | `npm run dev:frontend` |
+| Install (all) | `npm run install:all` |
 | Install frontend | `npm --prefix frontend install` |
 | Install backend | `npm --prefix backend install` |
 | Build frontend | `npm --prefix frontend run build` |
