@@ -107,27 +107,35 @@ psql -U postgres -d agriguide -f database/seeds/seed_pest_alerts.sql
 
 ---
 
-### 4. Start the backend
+### 4. Install dependencies
+
+From the repository root:
 
 ```bash
-cd backend
 npm install
-npm run dev
+npm run install:all
 ```
-
-Backend will run on `http://localhost:5000`.
 
 ---
 
-### 5. Start the frontend
+### 5. Start the app
+
+One command runs both servers together:
 
 ```bash
-cd frontend
-npm install
 npm run dev
 ```
 
-Frontend will run on `http://localhost:5173`.
+| Shortcut | What it runs |
+| --- | --- |
+| `npm run dev` | Backend (5000) and frontend (5173) together |
+| `npm run dev:backend` | Backend only |
+| `npm run dev:frontend` | Frontend only |
+| `npm run build` | Production build for both |
+| `npm run lint` | Frontend lint |
+| `npm run install:all` | Install both dependency trees |
+
+Backend runs on `http://localhost:5000`, frontend on `http://localhost:5173`.
 
 ---
 
