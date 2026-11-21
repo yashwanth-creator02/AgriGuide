@@ -297,41 +297,44 @@ function History() {
                   key={entry.id}
                   className="overflow-hidden rounded-3xl border-gray-100 bg-white shadow-sm transition hover:shadow-md"
                 >
-                  <button
-                    onClick={() => setExpanded(isExpanded ? null : entry.id)}
-                    className="flex w-full items-center justify-between gap-4 p-5 text-left transition hover:bg-gray-50 md:p-6"
-                  >
-                    <div className="flex min-w-0 flex-1 items-center gap-4">
-                      <div className="rounded-2xl bg-emerald-50 p-3">
-                        <FlaskConical className="h-5 w-5 text-emerald-700" />
-                      </div>
+                  <div className="flex w-full items-center justify-between gap-4 p-5 transition hover:bg-gray-50 md:p-6">
+                    <button
+                      onClick={() => setExpanded(isExpanded ? null : entry.id)}
+                      aria-expanded={isExpanded}
+                      className="flex min-w-0 flex-1 items-center gap-4 text-left"
+                    >
+                      <div className="flex min-w-0 flex-1 items-center gap-4">
+                        <div className="rounded-2xl bg-emerald-50 p-3">
+                          <FlaskConical className="h-5 w-5 text-emerald-700" />
+                        </div>
 
-                      <div className="min-w-0">
-                        <h2 className="truncate text-lg font-semibold text-gray-900">
-                          Soil Analysis #{history.length - index}
-                        </h2>
+                        <div className="min-w-0">
+                          <h2 className="truncate text-lg font-semibold text-gray-900">
+                            Soil Analysis #{history.length - index}
+                          </h2>
 
-                        <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-gray-500">
-                          <span className="inline-flex items-center gap-1">
-                            <MapPin className="h-3.5 w-3.5" />
-                            {entry.location || 'No location'}
-                          </span>
+                          <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-gray-500">
+                            <span className="inline-flex items-center gap-1">
+                              <MapPin className="h-3.5 w-3.5" />
+                              {entry.location || 'No location'}
+                            </span>
 
-                          <span className="inline-flex items-center gap-1">
-                            <Clock className="h-3.5 w-3.5" />
-                            {new Date(entry.created_at).toLocaleDateString('en-IN', {
-                              day: 'numeric',
-                              month: 'short',
-                              year: 'numeric',
-                            })}
-                          </span>
+                            <span className="inline-flex items-center gap-1">
+                              <Clock className="h-3.5 w-3.5" />
+                              {new Date(entry.created_at).toLocaleDateString('en-IN', {
+                                day: 'numeric',
+                                month: 'short',
+                                year: 'numeric',
+                              })}
+                            </span>
 
-                          <Badge className="rounded-full bg-emerald-100 px-2.5 py-1 text-emerald-700 hover:bg-emerald-100">
-                            {entry.season || 'Unknown season'}
-                          </Badge>
+                            <Badge className="rounded-full bg-emerald-100 px-2.5 py-1 text-emerald-700 hover:bg-emerald-100">
+                              {entry.season || 'Unknown season'}
+                            </Badge>
+                          </div>
                         </div>
                       </div>
-                    </div>
+                    </button>
 
                     <div className="flex items-center gap-2">
                       <button
@@ -355,7 +358,7 @@ function History() {
                         )}
                       </div>
                     </div>
-                  </button>
+                  </div>
 
                   {isExpanded && (
                     <div className="border-t border-gray-100 px-5 pb-6 pt-5 md:px-6">
